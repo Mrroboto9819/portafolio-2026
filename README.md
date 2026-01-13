@@ -113,7 +113,7 @@ portafolio-2026/
 
 ## 🎨 Customization
 
-### Update Personal Information
+<!-- ### Update Personal Information
 
 Edit the constants in `app/app.vue`:
 
@@ -166,7 +166,7 @@ const socialLinks = [
     url: 'https://github.com/yourusername'
   }
 ]
-```
+``` -->
 
 ### Change Colors
 
@@ -218,9 +218,9 @@ This project is open source and available under the [MIT License](LICENSE).
 - LinkedIn: [pablo-cabrera-castrejon](https://www.linkedin.com/in/pablo-cabrera-castrejon/)
 - Email: pablo.cabrera.castrejon@gmail.com
 
-## 🤝 Contributing
+<!-- ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome!
+Contributions, issues, and feature requests are welcome! -->
 
 ## ⭐ Show your support
 
