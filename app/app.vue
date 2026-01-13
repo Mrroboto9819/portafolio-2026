@@ -516,6 +516,7 @@ const skills = [
   { name: 'NODE.JS', icon: '/icons/nodedotjs.svg', level: 88 },
   { name: 'PYTHON', icon: '/icons/python.svg', level: 80 },
   { name: 'DJANGO', icon: '/icons/django.svg', level: 85 },
+  { name: 'NEXT', icon: '/icons/nextdotjs.svg', level: 88 },
   { name: 'NUXT', icon: '/icons/nuxt.svg', level: 88 },
   { name: 'MYSQL', icon: '/icons/mysql.svg', level: 75 },
   { name: 'MONGODB', icon: '/icons/mongodb.svg', level: 70 },
