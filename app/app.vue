@@ -444,7 +444,7 @@
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 text-[10px] sm:text-xs text-slate-500">
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="text-fuchsia-400">◆</span>
-          <span>SYSTEM v2.0.26</span>
+          <span>SYSTEM v1.0</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="hidden sm:inline">CREDITS: ∞</span>
@@ -515,6 +515,7 @@ const skills = [
   { name: 'REACT', icon: '/icons/react.svg', level: 85 },
   { name: 'NODE.JS', icon: '/icons/nodedotjs.svg', level: 88 },
   { name: 'PYTHON', icon: '/icons/python.svg', level: 80 },
+  { name: 'FLASK', icon: '/icons/flask.svg', level: 80 },
   { name: 'DJANGO', icon: '/icons/django.svg', level: 85 },
   { name: 'NEXT', icon: '/icons/nextdotjs.svg', level: 88 },
   { name: 'NUXT', icon: '/icons/nuxt.svg', level: 88 },
