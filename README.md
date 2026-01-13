@@ -17,6 +17,7 @@ A modern, cyberpunk-themed portfolio website built with Nuxt 3, featuring a gami
   - Work history showcase
   - Skills tree with XP bars
   - Quest log (projects) with live demo links
+  - Credentials log (education and certifications)
   - Social media connect section
 - 🎭 **Smooth Animations** - Glitch effects, hover transitions, and parallax scrolling
 - 🚀 **SEO Optimized** - Meta tags and semantic HTML structure
@@ -184,11 +185,12 @@ The portfolio is structured in sections with IDs:
 - `#work` - Work history
 - `#skills` - Skills tree
 - `#quests` - Projects/Quest log
+- `#credentials` - Education and certifications
 - `#connect` - Social links
 
 Update the `navItems` array to match your sections:
 ```javascript
-const navItems = ['HOME', 'WORK', 'SKILLS', 'QUESTS', 'CONNECT']
+const navItems = ['HOME', 'WORK', 'SKILLS', 'QUESTS', 'CREDENTIALS', 'CONNECT']
 ```
 
 ## 🌐 Deployment

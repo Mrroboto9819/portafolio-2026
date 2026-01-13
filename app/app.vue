@@ -3,7 +3,7 @@
     <!-- Animated grid background -->
     <div class="fixed inset-0 pointer-events-none overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
-      <div 
+      <div
         class="absolute inset-0 opacity-20"
         :style="{
           backgroundImage: 'linear-gradient(to right, #f0abfc 1px, transparent 1px), linear-gradient(to bottom, #f0abfc 1px, transparent 1px)',
@@ -12,9 +12,22 @@
           transformOrigin: 'center top'
         }"
       />
-      <!-- Glow orbs -->
-      <div class="absolute top-20 left-1/4 w-96 h-96 bg-fuchsia-500/20 rounded-full blur-3xl animate-pulse" />
-      <div class="absolute bottom-40 right-1/4 w-80 h-80 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s" />
+      <!-- Glow orbs with parallax -->
+      <div
+        class="absolute top-20 left-1/4 w-96 h-96 bg-fuchsia-500/20 rounded-full blur-3xl animate-pulse"
+        :style="{ transform: `translateY(${scrollY * 0.3}px)` }"
+      />
+      <div
+        class="absolute bottom-40 right-1/4 w-80 h-80 bg-cyan-500/20 rounded-full blur-3xl animate-pulse"
+        style="animation-delay: 1s"
+        :style="{ transform: `translateY(${scrollY * -0.2}px)` }"
+      />
+      <!-- Additional floating orb for more depth -->
+      <div
+        class="absolute top-1/2 right-1/3 w-64 h-64 bg-pink-500/15 rounded-full blur-3xl animate-pulse"
+        style="animation-delay: 2s"
+        :style="{ transform: `translateY(${scrollY * 0.4}px) translateX(${scrollY * 0.1}px)` }"
+      />
     </div>
 
     <!-- Scanlines overlay -->
@@ -88,6 +101,37 @@
       </div>
     </nav>
 
+    <!-- Parallax floating elements -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      <!-- Floating triangles -->
+      <div
+        class="absolute top-1/4 left-10 w-16 h-16 border border-cyan-400/20"
+        :style="{ transform: `translateY(${scrollY * 0.6}px) rotate(${scrollY * 0.1}deg)`, clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }"
+      />
+      <div
+        class="absolute top-1/3 right-20 w-12 h-12 border border-fuchsia-400/20"
+        :style="{ transform: `translateY(${scrollY * -0.4}px) rotate(${scrollY * -0.15}deg)`, clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }"
+      />
+      <!-- Floating hexagons -->
+      <div
+        class="absolute top-2/3 left-1/4 w-20 h-20 border border-pink-400/15"
+        :style="{ transform: `translateY(${scrollY * 0.35}px) rotate(${scrollY * 0.08}deg)`, clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)' }"
+      />
+      <div
+        class="absolute bottom-1/4 right-1/3 w-14 h-14 border border-cyan-400/15"
+        :style="{ transform: `translateY(${scrollY * -0.5}px) rotate(${scrollY * -0.12}deg)`, clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)' }"
+      />
+      <!-- Small circles -->
+      <div
+        class="absolute top-1/2 left-1/3 w-8 h-8 border border-fuchsia-400/20 rounded-full"
+        :style="{ transform: `translateY(${scrollY * 0.7}px) translateX(${scrollY * 0.05}px)` }"
+      />
+      <div
+        class="absolute bottom-1/3 right-1/4 w-10 h-10 border border-pink-400/20 rounded-full"
+        :style="{ transform: `translateY(${scrollY * -0.6}px) translateX(${scrollY * -0.08}px)` }"
+      />
+    </div>
+
     <!-- Main content -->
     <main class="relative z-10 pt-20 sm:pt-24 px-4 sm:px-6">
       <!-- Hero Section -->
@@ -95,13 +139,13 @@
         <div class="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center w-full">
           <div class="space-y-6 sm:space-y-8">
             <!-- Status indicator -->
-            <div class="flex items-center gap-3">
+            <div class="hero-status flex items-center gap-3">
               <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping" />
               <span class="text-cyan-400 text-xs tracking-widest">SYSTEM ONLINE</span>
             </div>
 
             <!-- Main title with glitch effect -->
-            <div class="space-y-2">
+            <div class="hero-title space-y-2">
               <h1
                 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight break-words"
                 :class="glitching ? 'animate-glitch' : ''"
@@ -119,7 +163,7 @@
             </div>
 
             <!-- Stats HUD -->
-            <div class="grid grid-cols-3 gap-2 sm:gap-4">
+            <div class="hero-stats grid grid-cols-3 gap-2 sm:gap-4">
               <div
                 v-for="stat in stats"
                 :key="stat.label"
@@ -133,7 +177,7 @@
             </div>
 
             <!-- CTA buttons -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+            <div class="hero-buttons flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
               <button
                 @mouseenter="hoverSound"
                 @click="scrollToSection('work')"
@@ -156,12 +200,12 @@
           <!-- Character display -->
           <div class="relative flex items-center justify-center mt-8 lg:mt-0">
             <div class="absolute inset-0 flex items-center justify-center">
-              <div class="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 border border-fuchsia-500/30 rotate-45 animate-spin-slow" />
-              <div class="absolute w-40 h-40 sm:w-52 sm:h-52 md:w-64 md:h-64 border border-cyan-400/30 rotate-45 animate-spin-slow-reverse" />
+              <div class="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 border-2 border-fuchsia-500/30 rotate-45 animate-spin-slow shadow-sm shadow-white/20" />
+              <div class="absolute w-40 h-40 sm:w-52 sm:h-52 md:w-64 md:h-64 border-2 border-cyan-400/30 rotate-45 animate-spin-slow-reverse shadow-sm shadow-white/20" />
             </div>
 
             <!-- Character avatar -->
-            <div class="relative z-10 p-4 sm:p-8">
+            <div class="hero-avatar relative z-10 p-4 sm:p-8">
               <div
                 class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 bg-slate-900 border-2 border-fuchsia-500 relative overflow-hidden"
               >
@@ -183,7 +227,7 @@
                 </div>
                 <div class="h-2 bg-slate-800 overflow-hidden">
                   <div
-                    class="h-full bg-gradient-to-r from-fuchsia-600 to-pink-500 transition-all duration-500"
+                    class="hp-bar-fill h-full bg-gradient-to-r from-fuchsia-600 to-pink-500"
                     :style="{ width: `${health}%` }"
                   />
                 </div>
@@ -195,7 +239,7 @@
 
       <!-- Work History Section -->
       <section id="work" class="max-w-6xl mx-auto py-12 sm:py-16 md:py-24">
-        <div class="flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
+        <div class="section-title flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-cyan-400">[</span>
@@ -211,7 +255,7 @@
             :key="company.name"
             @mouseenter="activeCompany = index"
             @mouseleave="activeCompany = null"
-            class="p-6 border border-slate-700/50 bg-slate-900/30 backdrop-blur-sm relative overflow-hidden group cursor-pointer transition-all duration-300"
+            class="work-card p-6 border border-slate-700/50 bg-slate-900/30 backdrop-blur-sm relative overflow-hidden group cursor-pointer transition-all duration-300"
             :class="activeCompany === index ? 'border-cyan-500/80 scale-105' : 'hover:border-fuchsia-400/50'"
             style="clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))"
           >
@@ -246,7 +290,7 @@
 
       <!-- Skills Section -->
       <section id="skills" class="max-w-6xl mx-auto py-12 sm:py-16 md:py-24">
-        <div class="flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
+        <div class="section-title flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-fuchsia-400">[</span>
@@ -262,7 +306,7 @@
             :key="skill.name"
             @mouseenter="activeSkill = index"
             @mouseleave="activeSkill = null"
-            class="p-3 sm:p-4 md:p-6 border border-slate-700/50 bg-slate-900/30 backdrop-blur-sm relative overflow-hidden group cursor-pointer transition-all duration-300"
+            class="skill-card p-3 sm:p-4 md:p-6 border border-slate-700/50 bg-slate-900/30 backdrop-blur-sm relative overflow-hidden group cursor-pointer transition-all duration-300"
             :class="activeSkill === index ? 'border-fuchsia-500/80 sm:scale-105' : 'hover:border-cyan-400/50'"
             style="clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))"
           >
@@ -283,8 +327,8 @@
                 <span class="text-cyan-400">{{ skill.level }}/100</span>
               </div>
               <div class="h-1.5 bg-slate-800 overflow-hidden">
-                <div 
-                  class="h-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 transition-all duration-1000"
+                <div
+                  class="xp-bar-fill h-full bg-gradient-to-r from-cyan-500 to-fuchsia-500"
                   :style="{ width: `${skill.level}%` }"
                 />
               </div>
@@ -298,7 +342,7 @@
 
       <!-- Projects Section (Quest Log) -->
       <section id="quests" class="max-w-6xl mx-auto py-12 sm:py-16 md:py-24">
-        <div class="flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
+        <div class="section-title flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-cyan-400">[</span>
@@ -319,7 +363,8 @@
           <div
             v-for="(project, index) in projects"
             :key="project.name"
-            class="border border-slate-700/50 bg-slate-900/30 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-fuchsia-500/50"
+            @click="expandedProject = expandedProject === index ? null : index"
+            class="quest-card border border-slate-700/50 bg-slate-900/30 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-fuchsia-500/50 cursor-pointer"
             style="clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))"
           >
             <div class="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
@@ -364,15 +409,6 @@
                     <span class="relative z-10">VIEW DEMO</span>
                     <div class="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-cyan-400 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
                   </button>
-
-                  <!-- Expand arrow -->
-                  <button
-                    @click.stop="expandedProject = expandedProject === index ? null : index"
-                    class="text-slate-500 hover:text-cyan-400 transition-all duration-300 p-1 sm:p-2"
-                    :class="expandedProject === index ? 'rotate-180' : ''"
-                  >
-                    ▼
-                  </button>
                 </div>
               </div>
             </div>
@@ -396,9 +432,112 @@
         </div>
       </section>
 
+      <!-- Credentials Section -->
+      <section id="credentials" class="max-w-6xl mx-auto py-12 sm:py-16 md:py-24">
+        <div class="section-title flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
+          <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+          <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
+            <span class="text-cyan-400">[</span>
+            CREDENTIALS_LOG
+            <span class="text-cyan-400">]</span>
+          </h2>
+          <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+        </div>
+
+        <div class="space-y-6 sm:space-y-8">
+          <!-- Education Section -->
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-fuchsia-400 mb-4 flex items-center gap-2">
+              <span class="text-cyan-400">▸</span> EDUCATION
+            </h3>
+            <div class="grid gap-4 sm:gap-6">
+              <div
+                v-for="(credential, index) in credentials.filter(c => c.type === 'DEGREE')"
+                :key="index"
+                class="credential-card border border-slate-700/50 bg-slate-900/30 backdrop-blur-sm p-4 sm:p-6 hover:border-cyan-500/50 transition-all duration-300"
+                style="clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))"
+              >
+                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                  <!-- Icon or Image placeholder -->
+                  <div class="shrink-0 w-16 h-16 sm:w-20 sm:h-20 border-2 border-cyan-400/50 bg-cyan-400/10 flex items-center justify-center text-2xl sm:text-3xl"
+                       style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
+                    <span v-if="!credential.image" class="text-cyan-400">🎓</span>
+                    <img v-else :src="credential.image" :alt="credential.institution" class="w-full h-full object-contain" />
+                  </div>
+
+                  <div class="flex-1">
+                    <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
+                      <div>
+                        <h4 class="text-base sm:text-lg font-bold text-cyan-400">{{ credential.title }}</h4>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1">{{ credential.institution }}</p>
+                      </div>
+                      <span class="text-[10px] sm:text-xs text-slate-500 px-2 py-1 border border-slate-600/50 whitespace-nowrap">
+                        {{ credential.period }}
+                      </span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-2">{{ credential.field }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Certifications Section -->
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-fuchsia-400 mb-4 flex items-center gap-2">
+              <span class="text-cyan-400">▸</span> CERTIFICATIONS
+            </h3>
+            <div class="grid sm:grid-cols-2 gap-4 sm:gap-6">
+              <div
+                v-for="(credential, index) in credentials.filter(c => c.type === 'CERTIFICATE')"
+                :key="index"
+                class="credential-card border border-slate-700/50 bg-slate-900/30 backdrop-blur-sm p-4 sm:p-5 hover:border-fuchsia-500/50 transition-all duration-300"
+                style="clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))"
+              >
+                <div class="flex flex-col gap-3">
+                  <!-- Header with icon -->
+                  <div class="flex items-start gap-3">
+                    <div class="shrink-0 w-10 h-10 sm:w-12 sm:h-12 border border-fuchsia-500/50 bg-fuchsia-500/10 flex items-center justify-center"
+                         style="clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)">
+                      <span v-if="!credential.image" class="text-fuchsia-400 text-lg sm:text-xl">✓</span>
+                      <img v-else :src="credential.image" :alt="credential.institution" class="w-full h-full object-contain" />
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h4 class="text-sm sm:text-base font-bold text-fuchsia-400 leading-tight line-clamp-2">{{ credential.title }}</h4>
+                      <p class="text-xs text-slate-300 mt-1">{{ credential.institution }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Period and Credential ID -->
+                  <div class="flex flex-wrap items-center gap-2 text-[10px] sm:text-xs">
+                    <span class="text-slate-500 px-2 py-0.5 border border-slate-600/50">
+                      {{ credential.period }}
+                    </span>
+                    <span v-if="credential.credentialId" class="text-cyan-400/70 font-mono">
+                      ID: {{ credential.credentialId }}
+                    </span>
+                  </div>
+
+                  <!-- Skills if available -->
+                  <div v-if="credential.skills" class="flex flex-wrap gap-1.5">
+                    <span
+                      v-for="skill in credential.skills"
+                      :key="skill"
+                      class="text-[10px] px-2 py-0.5 border border-cyan-400/30 text-cyan-400 bg-cyan-400/5"
+                    >
+                      {{ skill }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Contact Section -->
       <section id="connect" class="max-w-6xl mx-auto py-12 sm:py-16 md:py-24 pb-24 sm:pb-32">
-        <div class="flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
+        <div class="section-title flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-pink-400">[</span>
@@ -416,7 +555,7 @@
             :href="link.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex flex-col items-center gap-3 sm:gap-4 p-6 sm:p-8 border border-slate-700/50 bg-slate-900/30 hover:border-fuchsia-500/50 hover:bg-fuchsia-500/5 transition-all group relative"
+            class="social-link flex flex-col items-center gap-3 sm:gap-4 p-6 sm:p-8 border border-slate-700/50 bg-slate-900/30 hover:border-fuchsia-500/50 hover:bg-fuchsia-500/5 transition-all group relative"
             style="clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))"
           >
             <!-- Corner accent -->
@@ -458,6 +597,13 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+// Register GSAP plugins
+if (process.client) {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 useHead({
   title: 'Pablo Cabrera - Full Stack Developer',
@@ -466,7 +612,7 @@ useHead({
   ]
 })
 
-const navItems = ['HOME', 'WORK', 'SKILLS', 'QUESTS', 'CONNECT']
+const navItems = ['HOME', 'WORK', 'SKILLS', 'QUESTS', 'CREDENTIALS', 'CONNECT']
 const activeSection = ref('home')
 const activeSkill = ref(null)
 const activeCompany = ref(null)
@@ -566,6 +712,100 @@ const socialLinks = [
   }
 ]
 
+const credentials = [
+  {
+    type: 'DEGREE',
+    title: 'Ingeniería en Sistemas Computacionales',
+    institution: 'Universidad del Valle de México',
+    period: 'JUN 2018 - DEC 2022',
+    field: 'Desarrollo de aplicaciones web',
+    image: null
+  },
+  {
+    type: 'CERTIFICATE',
+    title: 'Continuous Integration & Continuous Deployment with Jenkins',
+    institution: 'LearnKartS',
+    period: 'MAY 2025',
+    credentialId: 'N32R63CR6U8W',
+    image: null
+  },
+  {
+    type: 'CERTIFICATE',
+    title: 'DevOps and Jenkins Fundamentals',
+    institution: 'LearnKartS',
+    period: 'MAY 2025',
+    credentialId: '6D9VKRZQ2K6K',
+    image: null
+  },
+  {
+    type: 'CERTIFICATE',
+    title: 'Django Application Development with SQL and Databases',
+    institution: 'IBM',
+    period: 'JAN 2024',
+    credentialId: 'EDVQ9GMKGZCG',
+    skills: ['Django', 'SQL', 'Databases'],
+    image: null
+  },
+  {
+    type: 'CERTIFICATE',
+    title: 'Python for Data Science, AI & Development',
+    institution: 'IBM',
+    period: 'JAN 2024',
+    credentialId: '65RCXR2AFP5K',
+    skills: ['Python'],
+    image: null
+  },
+  {
+    type: 'CERTIFICATE',
+    title: 'Introduction to Web Development with HTML, CSS, JavaScript',
+    institution: 'IBM',
+    period: 'JAN 2024',
+    credentialId: 'WWAEGLJMJV7D',
+    skills: ['HTML5', 'CSS', 'JavaScript'],
+    image: null
+  },
+  {
+    type: 'CERTIFICATE',
+    title: 'Version Control',
+    institution: 'Meta',
+    period: 'NOV 2024',
+    credentialId: 'LPZF8LWB4K2K',
+    image: null
+  },
+  {
+    type: 'CERTIFICATE',
+    title: 'Programming with JavaScript',
+    institution: 'Meta',
+    period: 'NOV 2024',
+    credentialId: '1JO6B9UW2MTE',
+    image: null
+  },
+  {
+    type: 'CERTIFICATE',
+    title: 'React Basics',
+    institution: 'Meta',
+    period: 'NOV 2024',
+    credentialId: 'WYDPPD1X5E7A',
+    image: null
+  },
+  {
+    type: 'CERTIFICATE',
+    title: 'Introduction to Mobile Development',
+    institution: 'Meta',
+    period: 'NOV 2024',
+    credentialId: 'BY5NCO4NL97L',
+    image: null
+  },
+  {
+    type: 'CERTIFICATE',
+    title: 'React Native',
+    institution: 'Meta',
+    period: 'NOV 2023',
+    credentialId: '3VJTVXZAS04W',
+    image: null
+  }
+]
+
 const hoverSound = () => {
   glitching.value = true
   setTimeout(() => glitching.value = false, 150)
@@ -608,15 +848,197 @@ const openProjectDemo = (redirect) => {
 
 const handleScroll = () => {
   scrollY.value = window.scrollY
+
+  // Update active section based on scroll position
+  const sections = ['home', 'work', 'skills', 'quests', 'credentials', 'connect']
+  const scrollPosition = window.scrollY + 150 // Offset for navbar
+
+  // Check if we're at the bottom of the page
+  const isAtBottom = (window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 50
+
+  // If at bottom, activate the last section
+  if (isAtBottom) {
+    activeSection.value = sections[sections.length - 1]
+    return
+  }
+
+  for (let i = sections.length - 1; i >= 0; i--) {
+    const section = document.getElementById(sections[i])
+    if (section && section.offsetTop <= scrollPosition) {
+      activeSection.value = sections[i]
+      break
+    }
+  }
 }
 
 onMounted(() => {
   typeWriter()
   window.addEventListener('scroll', handleScroll)
+
+  // GSAP Animations
+  if (process.client) {
+    // Hero section entrance animations
+    gsap.from('.hero-status', {
+      opacity: 0,
+      x: -50,
+      duration: 0.8,
+      ease: 'power3.out'
+    })
+
+    gsap.from('.hero-title', {
+      opacity: 0,
+      y: 30,
+      duration: 1,
+      delay: 0.3,
+      ease: 'power3.out'
+    })
+
+    gsap.from('.hero-stats > div', {
+      opacity: 0,
+      y: 20,
+      duration: 0.6,
+      stagger: 0.1,
+      delay: 0.6,
+      ease: 'power2.out'
+    })
+
+    gsap.from('.hero-buttons > button', {
+      opacity: 0,
+      scale: 0.9,
+      duration: 0.5,
+      stagger: 0.15,
+      delay: 0.9,
+      ease: 'back.out(1.7)'
+    })
+
+    gsap.from('.hero-avatar', {
+      opacity: 0,
+      scale: 0.8,
+      rotation: -10,
+      duration: 1.2,
+      delay: 0.5,
+      ease: 'elastic.out(1, 0.5)'
+    })
+
+    // Scroll-triggered animations for sections
+    gsap.utils.toArray('.section-title').forEach((title) => {
+      gsap.from(title, {
+        scrollTrigger: {
+          trigger: title,
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        opacity: 0,
+        scale: 0.9,
+        duration: 0.6,
+        ease: 'power2.out'
+      })
+    })
+
+    // XP bars animation for skills
+    gsap.utils.toArray('.xp-bar-fill').forEach((bar) => {
+      gsap.from(bar, {
+        scrollTrigger: {
+          trigger: bar,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        width: '0%',
+        duration: 1.2,
+        ease: 'power2.out'
+      })
+    })
+
+    // Work history cards animation
+    gsap.utils.toArray('.work-card').forEach((card, index) => {
+      gsap.from(card, {
+        scrollTrigger: {
+          trigger: card,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        opacity: 0,
+        y: 50,
+        rotation: index % 2 === 0 ? -5 : 5,
+        duration: 0.8,
+        delay: index * 0.1,
+        ease: 'power3.out'
+      })
+    })
+
+    // Skills cards animation
+    gsap.utils.toArray('.skill-card').forEach((card, index) => {
+      gsap.from(card, {
+        scrollTrigger: {
+          trigger: card,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.6,
+        delay: index * 0.05,
+        ease: 'back.out(1.7)'
+      })
+    })
+
+    // Quest cards animation
+    gsap.utils.toArray('.quest-card').forEach((card, index) => {
+      gsap.from(card, {
+        scrollTrigger: {
+          trigger: card,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        opacity: 0,
+        x: index % 2 === 0 ? -50 : 50,
+        duration: 0.8,
+        ease: 'power3.out'
+      })
+    })
+
+    // Credential cards animation
+    gsap.utils.toArray('.credential-card').forEach((card, index) => {
+      gsap.from(card, {
+        scrollTrigger: {
+          trigger: card,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        opacity: 0,
+        y: 30,
+        duration: 0.6,
+        delay: index * 0.08,
+        ease: 'power2.out'
+      })
+    })
+
+    // Social links animation
+    gsap.utils.toArray('.social-link').forEach((link, index) => {
+      gsap.from(link, {
+        scrollTrigger: {
+          trigger: link,
+          start: 'top 95%',
+          toggleActions: 'play none none reverse'
+        },
+        opacity: 0,
+        y: 30,
+        rotation: 10,
+        duration: 0.6,
+        delay: index * 0.1,
+        ease: 'back.out(1.7)'
+      })
+    })
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+
+  // Clean up GSAP ScrollTriggers
+  if (process.client) {
+    ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+  }
 })
 </script>
 
