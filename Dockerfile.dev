@@ -1,0 +1,23 @@
+# Development Dockerfile for Nuxt 3 with Bun
+FROM oven/bun:1-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package.json bun.lock* ./
+
+# Install dependencies
+RUN bun install
+
+# Copy application code
+COPY . .
+
+# Expose the port Nuxt runs on
+EXPOSE 3000
+
+# Set environment to development
+ENV NODE_ENV=development
+
+# Start development server with hot reload
+CMD ["bun", "run", "dev", "--host", "0.0.0.0"]
