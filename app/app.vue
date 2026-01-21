@@ -886,18 +886,18 @@ const projects = ref([
     iconStyle: {},
     opacity: 1
   },
-  {
-    name: 'ECOMMERCE_DEMO_BACKEND',
-    type: 'SIDE_QUEST',
-    description: 'Demo of api server admin in Django',
-    tech: ['DJANGO', 'POSTGRESQL'],
-    xp: 1500,
-    completed: true,
-    redirect: 'https://store-api.pablocabrera.dev/admin/login/',
-    icon: null,
-    iconStyle: {},
-    opacity: 1
-  }
+  // {
+  //   name: 'ECOMMERCE_DEMO_BACKEND',
+  //   type: 'SIDE_QUEST',
+  //   description: 'Demo of api server admin in Django',
+  //   tech: ['DJANGO', 'POSTGRESQL'],
+  //   xp: 1500,
+  //   completed: true,
+  //   redirect: 'https://store-api.pablocabrera.dev/admin/login/',
+  //   icon: null,
+  //   iconStyle: {},
+  //   opacity: 1
+  // }
 ])
 
 const socialLinks = [
