@@ -1,0 +1,58 @@
+{
+    "HOME": "HOME",
+    "WORK": "WORK",
+    "SKILLS": "SKILLS",
+    "QUESTS": "QUESTS",
+    "CREDENTIALS": "CREDENTIALS",
+    "CONNECT": "CONNECT",
+    "HERO": {
+        "STATUS": "SYSTEM ONLINE",
+        "GREETING_PREFIX": "HELLO I AM",
+        "ROLE": "SOFTWARE_ENGINEER",
+        "START_GAME": "START_GAME",
+        "VIEW_STATS": "VIEW_STATS",
+        "HP": "HP"
+    },
+    "SECTIONS": {
+        "WORK": {
+            "TITLE": "WORK_HISTORY"
+        },
+        "SKILLS": {
+            "TITLE": "SKILL_TREE",
+            "XP": "XP"
+        },
+        "QUESTS": {
+            "TITLE": "QUEST_LOG",
+            "INSTRUCTIONS": "Click \"VIEW DEMO\" to see live projects or expand to view tech stack",
+            "INSTRUCTIONS_MOBILE": "Tap \"VIEW DEMO\" or expand for details",
+            "ACTIVE": "ACTIVE",
+            "REWARD": "REWARD",
+            "VIEW_DEMO": "VIEW DEMO"
+        },
+        "CREDENTIALS": {
+            "TITLE": "CREDENTIALS_LOG",
+            "EDUCATION": "EDUCATION",
+            "CERTIFICATIONS": "CERTIFICATIONS",
+            "ID": "ID"
+        },
+        "CONNECT": {
+            "TITLE": "ESTABLISH_LINK",
+            "Socials": {
+                "GITHUB": "GITHUB",
+                "LINKEDIN": "LINKEDIN",
+                "EMAIL": "EMAIL"
+            }
+        }
+    },
+    "FOOTER": {
+        "SYSTEM": "SYSTEM v3.6",
+        "CREDITS": "CREDITS",
+        "BUILT_WITH": "BUILT WITH",
+        "ICONS_BY": "ICONS BY NUCLEO",
+        "MUSIC_BY": "MUSIC BY FREEMUSICC"
+    },
+    "MUSIC_PLAYER": {
+        "PLAYING": "PLAYING",
+        "PAUSED": "PAUSED"
+    }
+}
