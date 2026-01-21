@@ -383,9 +383,9 @@
                 <img 
                   v-if="project.icon" 
                   :src="project.icon" 
-                  :style="{ ...project.iconStyle, opacity: project.opacity }"
+                  :style="project.iconStyle"
                   alt="icon" 
-                  class="w-8 h-8 sm:w-10 sm:h-10 object-contain ml-2 transition-all duration-500" 
+                  class="w-8 h-8 sm:w-10 sm:h-10 object-contain ml-2 transition-all duration-300 animate-bounce-custom" 
                 />
                 <span v-else-if="project.completed" class="text-cyan-400 text-xl sm:text-2xl">✓</span>
                 <span v-else class="text-fuchsia-400 text-xs sm:text-sm">ACTIVE</span>
@@ -599,12 +599,15 @@
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 text-[10px] sm:text-xs text-slate-500">
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="text-fuchsia-400">◆</span>
-          <span>SYSTEM v2.0</span>
+          <span>SYSTEM v2.1</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="hidden sm:inline">CREDITS: ∞</span>
           <span class="text-cyan-400 hidden sm:inline">|</span>
           <span class="text-center">BUILT WITH <span class="hidden sm:inline">VUE + TAILWIND</span><span class="sm:hidden">NUXT</span></span>
+        </div>
+        <div class="hidden sm:block">
+           <a href="https://nucleoapp.com/app/" target="_blank" class="hover:text-cyan-400 transition-colors">ICONS BY NUCLEO</a>
         </div>
       </div>
     </footer>
@@ -951,29 +954,23 @@ onMounted(() => {
   // Initialize and animate project icons
   const randomizeProjectIcons = () => {
     projects.value.forEach(project => {
-      // Fade out
-      project.opacity = 0
+      const randomIcon = uiIcons[Math.floor(Math.random() * uiIcons.length)]
+      project.icon = `/icons/ui/${randomIcon}`
       
-      // Wait for fade out, then swap
-      setTimeout(() => {
-        const randomIcon = uiIcons[Math.floor(Math.random() * uiIcons.length)]
-        project.icon = `/icons/ui/${randomIcon}`
-        // Random hue rotate for glitch effect
-        const randomHue = Math.floor(Math.random() * 360)
-        project.iconStyle = {
-          filter: `hue-rotate(${randomHue}deg) brightness(1.2)`
-        }
-        
-        // Fade in
-        setTimeout(() => {
-          project.opacity = 1
-        }, 50)
-      }, 500) // Match transition duration
+      // Toggle between Cyan and Fuchsia filters
+      const isCyan = Math.random() > 0.5
+      
+      const cyanFilter = 'brightness(0) saturate(100%) invert(73%) sepia(55%) saturate(458%) hue-rotate(142deg) brightness(97%) contrast(92%)'
+      const fuchsiaFilter = 'brightness(0) saturate(100%) invert(57%) sepia(89%) saturate(6373%) hue-rotate(290deg) brightness(101%) contrast(101%)'
+      
+      project.iconStyle = {
+        filter: isCyan ? cyanFilter : fuchsiaFilter
+      }
     })
   }
 
   randomizeProjectIcons()
-  projectInterval.value = setInterval(randomizeProjectIcons, 3000)
+  projectInterval.value = setInterval(randomizeProjectIcons, 1000)
 
 
   // GSAP Animations
@@ -1183,5 +1180,13 @@ img[src$='.svg'] {
 
 .icon-fuchsia {
   filter: brightness(0) saturate(100%) invert(57%) sepia(89%) saturate(6373%) hue-rotate(290deg) brightness(101%) contrast(101%) !important;
+}
+
+@keyframes bounce-custom {
+  /* 0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-25%); } */
+}
+.animate-bounce-custom {
+  animation: bounce-custom 2s infinite ease-in-out;
 }
 </style>
