@@ -25,6 +25,9 @@ yarn-error.log*
 .fleet
 .idea
 .vscode
+.claude
+.qodo
+tmpclaude-*
 
 # Local env files
 .env
@@ -34,6 +37,7 @@ yarn-error.log*
 # Production Docker files (keep dev versions only)
 Dockerfile
 docker-compose.yml
+docker-compose.prod.yml
 
 # Docker volumes and temp files
 .dockerignore

@@ -1,0 +1,38 @@
+name: Front - Build & Deploy (Local Docker)
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH (local Docker build)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+
+            cd /opt/webapps/apps/portafolio-2026
+
+            echo "Pulling latest code..."
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            git pull origin main
+
+            echo "Building containers..."
+            docker compose -f docker-compose.prod.yml build
+
+            echo "Restarting containers..."
+            docker compose -f docker-compose.prod.yml up -d
+
+            echo "Cleaning unused images..."
+            docker image prune -f

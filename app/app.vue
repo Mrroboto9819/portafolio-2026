@@ -141,6 +141,7 @@
             <!-- Status indicator -->
             <div class="hero-status flex items-center gap-3">
               <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping" />
+              <img src="/icons/ui/robot-2.svg" alt="status" class="w-4 h-4" />
               <span class="text-cyan-400 text-xs tracking-widest">SYSTEM ONLINE</span>
             </div>
 
@@ -171,7 +172,10 @@
                 style="clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))"
               >
                 <div class="absolute inset-0 bg-gradient-to-r from-fuchsia-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div class="text-lg sm:text-2xl font-bold text-fuchsia-400">{{ stat.value }}</div>
+                <div class="flex items-center gap-2 mb-1">
+                   <img v-if="stat.icon" :src="stat.icon" :alt="stat.label" class="w-4 h-4 opacity-70" />
+                   <div class="text-lg sm:text-2xl font-bold text-fuchsia-400">{{ stat.value }}</div>
+                </div>
                 <div class="text-[10px] sm:text-xs text-slate-500 tracking-wider">{{ stat.label }}</div>
               </div>
             </div>
@@ -243,6 +247,7 @@
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-cyan-400">[</span>
+            <img src="/icons/ui/cyborg.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2 icon-fuchsia" alt="icon" />
             WORK_HISTORY
             <span class="text-cyan-400">]</span>
           </h2>
@@ -294,6 +299,7 @@
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-fuchsia-400">[</span>
+            <img src="/icons/ui/hammer.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2" alt="icon" />
             SKILL_TREE
             <span class="text-fuchsia-400">]</span>
           </h2>
@@ -346,6 +352,7 @@
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-cyan-400">[</span>
+            <img src="/icons/ui/ghost.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2 icon-fuchsia" alt="icon" />
             QUEST_LOG
             <span class="text-cyan-400">]</span>
           </h2>
@@ -370,10 +377,17 @@
             <div class="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
               <!-- Quest status -->
               <div
-                class="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 shrink-0"
+                class="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 shrink-0 transition-colors duration-500"
                 :class="project.completed ? 'border-cyan-400 bg-cyan-400/10' : 'border-fuchsia-500 bg-fuchsia-500/10'"
               >
-                <span v-if="project.completed" class="text-cyan-400 text-xl sm:text-2xl">✓</span>
+                <img 
+                  v-if="project.icon" 
+                  :src="project.icon" 
+                  :style="{ ...project.iconStyle, opacity: project.opacity }"
+                  alt="icon" 
+                  class="w-8 h-8 sm:w-10 sm:h-10 object-contain ml-2 transition-all duration-500" 
+                />
+                <span v-else-if="project.completed" class="text-cyan-400 text-xl sm:text-2xl">✓</span>
                 <span v-else class="text-fuchsia-400 text-xs sm:text-sm">ACTIVE</span>
               </div>
 
@@ -438,6 +452,7 @@
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-cyan-400">[</span>
+            <img src="/icons/ui/smile-eyes-2.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2 icon-fuchsia" alt="icon" />
             CREDENTIALS_LOG
             <span class="text-cyan-400">]</span>
           </h2>
@@ -541,6 +556,7 @@
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-pink-400">[</span>
+            <img src="/icons/ui/cat.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2" alt="icon" />
             CONNECT
             <span class="text-pink-400">]</span>
           </h2>
@@ -563,7 +579,7 @@
 
             <div class="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 border-cyan-400/50 bg-cyan-400/10 text-2xl sm:text-3xl group-hover:border-fuchsia-500/50 group-hover:bg-fuchsia-500/10 group-hover:scale-110 transition-all"
                  style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
-              {{ link.icon }}
+              <img :src="link.icon" :alt="link.name" class="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             <div class="text-center">
               <div class="font-bold text-base sm:text-lg text-slate-100 group-hover:text-fuchsia-400 transition-colors mb-1">{{ link.name }}</div>
@@ -583,7 +599,7 @@
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 text-[10px] sm:text-xs text-slate-500">
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="text-fuchsia-400">◆</span>
-          <span>SYSTEM v1.0</span>
+          <span>SYSTEM v2.0</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="hidden sm:inline">CREDITS: ∞</span>
@@ -624,11 +640,12 @@ const mobileMenuOpen = ref(false)
 
 const displayedName = ref('')
 const fullName = 'PABLO CABRERA'
+const projectInterval = ref(null)
 
 const stats = [
-  { label: 'PROJECTS', value: '50+' },
+  { label: 'PROJECTS', value: '50+', icon: '/icons/ui/calendar.svg' },
   // { label: 'COMMITS', value: '2.5K' },
-  { label: 'COFFEE', value: '∞' }
+  { label: 'COFFEE', value: '∞', icon: '/icons/ui/smile.svg' }
 ]
 
 const companies = [
@@ -670,7 +687,25 @@ const skills = [
   { name: 'DOCKER', icon: '/icons/docker.svg', level: 50 }
 ]
 
-const projects = [
+const uiIcons = [
+  'boot.svg',
+  'calendar.svg',
+  'cat.svg',
+  'cyborg.svg',
+  'face-disappointed.svg',
+  'face-grin.svg',
+  'football-helmet.svg',
+  'ghost.svg',
+  'hammer.svg',
+  'question-mark.svg',
+  'robot-2.svg',
+  'smile-eyes-2.svg',
+  'smile.svg',
+  'user-2.svg',
+  'winter-glove.svg'
+]
+
+const projects = ref([
   {
     name: 'PORTAFOLIO_2026',
     type: 'MAIN_QUEST',
@@ -678,7 +713,10 @@ const projects = [
     tech: ['Nuxtjs', 'TailwindCSS'],
     xp: 1000,
     completed: true,
-    redirect: '/'
+    redirect: '/',
+    icon: null,
+    iconStyle: {},
+    opacity: 1
   },
   {
     name: 'CATALOG_MONITOR',
@@ -687,26 +725,53 @@ const projects = [
     tech: ['Nuxtjs', 'TailwindCSS'],
     xp: 750,
     completed: true,
-    redirect: 'https://monitor.pablocabrera.dev/'
+    redirect: 'https://monitor.pablocabrera.dev/',
+    icon: null,
+    iconStyle: {},
+    opacity: 1
+  },
+  {
+    name: 'ECOMMERCE DEMO FRONTEND',
+    type: 'SIDE_QUEST',
+    description: 'Ecommerce demo frontend',
+    tech: ['Nuxtjs', 'TailwindCSS'],
+    xp: 1000,
+    completed: true,
+    redirect: 'https://store.pablocabrera.dev/',
+    icon: null,
+    iconStyle: {},
+    opacity: 1
+  },
+  {
+    name: 'ECOMMERCE DEMO BACKEND',
+    type: 'SIDE_QUEST',
+    description: 'Demo of api server admin in Django',
+    tech: ['DJANGO', 'POSTGRESQL'],
+    xp: 1500,
+    completed: true,
+    redirect: 'https://store-api.pablocabrera.dev/admin/login/',
+    icon: null,
+    iconStyle: {},
+    opacity: 1
   }
-]
+])
 
 const socialLinks = [
   {
     name: 'GITHUB',
-    icon: '⬡',
+    icon: '/icons/ui/github.svg',
     handle: '@Mrroboto9819',
     url: 'https://github.com/Mrroboto9819'
   },
   {
     name: 'LINKEDIN',
-    icon: '◈',
+    icon: '/icons/ui/linkedin.svg',
     handle: 'pablo-cabrera-castrejon',
     url: 'https://www.linkedin.com/in/pablo-cabrera-castrejon/'
   },
   {
     name: 'EMAIL',
-    icon: '✉',
+    icon: '/icons/ui/envelope-fill-24.svg',
     handle: 'pablo.cabrera.castrejon@gmail.com',
     url: 'mailto:pablo.cabrera.castrejon@gmail.com'
   }
@@ -723,11 +788,19 @@ const credentials = [
   },
   {
     type: 'CERTIFICATE',
+    title: 'Working with Data',
+    institution: 'Meta',
+    period: 'JAN 2026',
+    credentialId: 'QLM16WJACL1R',
+    image: '/images/certs/meta_logo.png'
+  },
+  {
+    type: 'CERTIFICATE',
     title: 'Continuous Integration & Continuous Deployment with Jenkins',
     institution: 'LearnKartS',
     period: 'MAY 2025',
     credentialId: 'N32R63CR6U8W',
-    image: null
+    image: '/images/certs/learnkarts_logo.png'
   },
   {
     type: 'CERTIFICATE',
@@ -735,7 +808,7 @@ const credentials = [
     institution: 'LearnKartS',
     period: 'MAY 2025',
     credentialId: '6D9VKRZQ2K6K',
-    image: null
+    image: '/images/certs/learnkarts_logo.png'
   },
   {
     type: 'CERTIFICATE',
@@ -744,7 +817,7 @@ const credentials = [
     period: 'JAN 2024',
     credentialId: 'EDVQ9GMKGZCG',
     skills: ['Django', 'SQL', 'Databases'],
-    image: null
+    image: '/images/certs/ibm_logo.jpg'
   },
   {
     type: 'CERTIFICATE',
@@ -753,7 +826,7 @@ const credentials = [
     period: 'JAN 2024',
     credentialId: '65RCXR2AFP5K',
     skills: ['Python'],
-    image: null
+    image: '/images/certs/ibm_logo.jpg'
   },
   {
     type: 'CERTIFICATE',
@@ -762,7 +835,7 @@ const credentials = [
     period: 'JAN 2024',
     credentialId: 'WWAEGLJMJV7D',
     skills: ['HTML5', 'CSS', 'JavaScript'],
-    image: null
+    image: '/images/certs/ibm_logo.jpg'
   },
   {
     type: 'CERTIFICATE',
@@ -770,7 +843,7 @@ const credentials = [
     institution: 'Meta',
     period: 'NOV 2024',
     credentialId: 'LPZF8LWB4K2K',
-    image: null
+    image: '/images/certs/meta_logo.png'
   },
   {
     type: 'CERTIFICATE',
@@ -778,7 +851,7 @@ const credentials = [
     institution: 'Meta',
     period: 'NOV 2024',
     credentialId: '1JO6B9UW2MTE',
-    image: null
+    image: '/images/certs/meta_logo.png'
   },
   {
     type: 'CERTIFICATE',
@@ -786,7 +859,7 @@ const credentials = [
     institution: 'Meta',
     period: 'NOV 2024',
     credentialId: 'WYDPPD1X5E7A',
-    image: null
+    image: '/images/certs/meta_logo.png'
   },
   {
     type: 'CERTIFICATE',
@@ -794,7 +867,7 @@ const credentials = [
     institution: 'Meta',
     period: 'NOV 2024',
     credentialId: 'BY5NCO4NL97L',
-    image: null
+    image: '/images/certs/meta_logo.png'
   },
   {
     type: 'CERTIFICATE',
@@ -802,7 +875,7 @@ const credentials = [
     institution: 'Meta',
     period: 'NOV 2023',
     credentialId: '3VJTVXZAS04W',
-    image: null
+    image: '/images/certs/meta_logo.png'
   }
 ]
 
@@ -874,6 +947,34 @@ const handleScroll = () => {
 onMounted(() => {
   typeWriter()
   window.addEventListener('scroll', handleScroll)
+
+  // Initialize and animate project icons
+  const randomizeProjectIcons = () => {
+    projects.value.forEach(project => {
+      // Fade out
+      project.opacity = 0
+      
+      // Wait for fade out, then swap
+      setTimeout(() => {
+        const randomIcon = uiIcons[Math.floor(Math.random() * uiIcons.length)]
+        project.icon = `/icons/ui/${randomIcon}`
+        // Random hue rotate for glitch effect
+        const randomHue = Math.floor(Math.random() * 360)
+        project.iconStyle = {
+          filter: `hue-rotate(${randomHue}deg) brightness(1.2)`
+        }
+        
+        // Fade in
+        setTimeout(() => {
+          project.opacity = 1
+        }, 50)
+      }, 500) // Match transition duration
+    })
+  }
+
+  randomizeProjectIcons()
+  projectInterval.value = setInterval(randomizeProjectIcons, 3000)
+
 
   // GSAP Animations
   if (process.client) {
@@ -1034,6 +1135,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  if (projectInterval.value) clearInterval(projectInterval.value)
 
   // Clean up GSAP ScrollTriggers
   if (process.client) {
@@ -1077,5 +1179,9 @@ img[src$='.svg'] {
 
 .group:hover img[src$='.svg'] {
   filter: brightness(0) saturate(100%) invert(57%) sepia(89%) saturate(6373%) hue-rotate(290deg) brightness(101%) contrast(101%);
+}
+
+.icon-fuchsia {
+  filter: brightness(0) saturate(100%) invert(57%) sepia(89%) saturate(6373%) hue-rotate(290deg) brightness(101%) contrast(101%) !important;
 }
 </style>
