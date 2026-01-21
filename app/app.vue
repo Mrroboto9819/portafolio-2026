@@ -455,8 +455,23 @@
                 <!-- Action buttons -->
                 <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                   <!-- View Demo button for completed projects -->
+                  <!-- View Demo button for completed projects -->
+                  <div v-if="project.platforms && project.platforms.length > 0" class="flex flex-wrap gap-2 justify-end">
+                    <button
+                      v-for="platform in project.platforms"
+                      :key="platform.name"
+                      @click.stop="openProjectDemo(platform.url)"
+                      class="px-2 sm:px-3 py-2 bg-gradient-to-r from-cyan-600 to-cyan-500 text-white text-[10px] sm:text-xs font-bold tracking-wider hover:from-cyan-500 hover:to-cyan-400 transition-all relative overflow-hidden group whitespace-nowrap flex items-center gap-2"
+                      style="clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))"
+                      :title="platform.name"
+                    >
+                      <img :src="platform.icon" class="w-3 h-3 sm:w-4 sm:h-4 platform-icon invert" :alt="platform.name" />
+                      <span class="relative z-10 hidden md:inline">{{ platform.name }}</span>
+                      <div class="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-cyan-400 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
+                    </button>
+                  </div>
                   <button
-                    v-if="project.completed && project.redirect"
+                    v-else-if="project.completed && project.redirect"
                     @click.stop="openProjectDemo(project.redirect)"
                     class="px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-600 to-cyan-500 text-white text-[10px] sm:text-xs font-bold tracking-wider hover:from-cyan-500 hover:to-cyan-400 transition-all relative overflow-hidden group whitespace-nowrap"
                     style="clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))"
@@ -863,7 +878,7 @@ const projects = ref([
     opacity: 1
   },
   {
-    name: 'CATALOG_MONITOR',
+    name: 'CATALOG_MAKER',
     type: 'SIDE_QUEST',
     description: 'Product catalog creation and management platform',
     tech: ['Nuxtjs', 'TailwindCSS'],
@@ -882,6 +897,23 @@ const projects = ref([
     xp: 1000,
     completed: true,
     redirect: 'https://store.pablocabrera.dev/',
+    icon: null,
+    iconStyle: {},
+    opacity: 1
+  },
+  {
+    name: 'TASK_MANAGER_DESKTOP_APP',
+    type: 'SIDE_QUEST',
+    description: 'Task manager desktop app',
+    tech: ['TAURI', 'SVELTE'],
+    xp: 3000,
+    completed: true,
+    redirect: 'https://store.pablocabrera.dev/',
+    platforms: [
+      { name: 'Windows', icon: '/icons/os/windows.svg', url: 'https://github.com/Mrroboto9819/task-manager-v1/releases/download/V1.0/x86_64-pc-windows-msvc.zip' },
+      { name: 'Linux', icon: '/icons/os/linux.svg', url: 'https://github.com/Mrroboto9819/task-manager-v1/releases/download/V1.0/task-manager-v1_0.1.0_amd64.deb' },
+      { name: 'macOS', icon: '/icons/os/apple.svg', url: 'https://github.com/Mrroboto9819/task-manager-v1/releases/download/V1.0/task-manager-v1_0.1.0_x64.dmg' }
+    ],
     icon: null,
     iconStyle: {},
     opacity: 1
@@ -1370,12 +1402,12 @@ onUnmounted(() => {
 }
 
 /* Style SVG icons with cyberpunk colors */
-img[src$='.svg']:not(.flag-icon) {
+img[src$='.svg']:not(.flag-icon):not(.platform-icon) {
   filter: brightness(0) saturate(100%) invert(73%) sepia(55%) saturate(458%) hue-rotate(142deg) brightness(97%) contrast(92%);
   transition: filter 0.3s ease;
 }
 
-.group:hover img[src$='.svg']:not(.flag-icon) {
+.group:hover img[src$='.svg']:not(.flag-icon):not(.platform-icon) {
   filter: brightness(0) saturate(100%) invert(57%) sepia(89%) saturate(6373%) hue-rotate(290deg) brightness(101%) contrast(101%);
 }
 
