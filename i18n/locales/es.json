@@ -1,0 +1,58 @@
+{
+    "HOME": "INICIO",
+    "WORK": "PROYECTOS",
+    "SKILLS": "HABILIDADES",
+    "QUESTS": "MISIONES",
+    "CREDENTIALS": "CERTIFICADOS",
+    "CONNECT": "CONTACTO",
+    "HERO": {
+        "STATUS": "SISTEMA EN LINEA",
+        "GREETING_PREFIX": "HOLA SOY",
+        "ROLE": "INGENIERO_DE_SOFTWARE",
+        "START_GAME": "INICIAR_JUEGO",
+        "VIEW_STATS": "VER_ESTADISTICAS",
+        "HP": "PV"
+    },
+    "SECTIONS": {
+        "WORK": {
+            "TITLE": "HISTORIAL_LABORAL"
+        },
+        "SKILLS": {
+            "TITLE": "HABILIDADES",
+            "XP": "XP"
+        },
+        "QUESTS": {
+            "TITLE": "MISIONES",
+            "INSTRUCTIONS": "Haz clic en \"VER DEMO\" para ver proyectos en vivo o expande para ver tecnologías",
+            "INSTRUCTIONS_MOBILE": "Toca \"VER DEMO\" o expande para detalles",
+            "ACTIVE": "ACTIVO",
+            "REWARD": "RECOMPENSA",
+            "VIEW_DEMO": "VER DEMO"
+        },
+        "CREDENTIALS": {
+            "TITLE": "CREDENCIALES",
+            "EDUCATION": "EDUCACION",
+            "CERTIFICATIONS": "CERTIFICACIONES",
+            "ID": "ID"
+        },
+        "CONNECT": {
+            "TITLE": "CONECTAR",
+            "Socials": {
+                "GITHUB": "GITHUB",
+                "LINKEDIN": "LINKEDIN",
+                "EMAIL": "CORREO"
+            }
+        }
+    },
+    "FOOTER": {
+        "SYSTEM": "SISTEMA v3",
+        "CREDITS": "CREDITOS",
+        "BUILT_WITH": "CONSTRUIDO CON",
+        "ICONS_BY": "ICONOS POR NUCLEO",
+        "MUSIC_BY": "MUSICA POR FREEMUSICC"
+    },
+    "MUSIC_PLAYER": {
+        "PLAYING": "REPRODUCIENDO",
+        "PAUSED": "PAUSADO"
+    }
+}
