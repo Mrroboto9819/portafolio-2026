@@ -599,7 +599,7 @@
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 text-[10px] sm:text-xs text-slate-500">
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="text-fuchsia-400">◆</span>
-          <span>SYSTEM v2.0</span>
+          <span>SYSTEM v2.1</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="hidden sm:inline">CREDITS: ∞</span>
