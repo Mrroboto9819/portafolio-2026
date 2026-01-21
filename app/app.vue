@@ -58,13 +58,31 @@
             class="relative px-3 lg:px-4 py-2 text-xs tracking-wider transition-all duration-300 group"
             :class="activeSection === item.toLowerCase() ? 'text-cyan-400' : 'text-slate-400 hover:text-fuchsia-400'"
           >
-            <span class="relative z-10">{{ item }}</span>
+            <span class="relative z-10">{{ $t(item) }}</span>
             <div
               v-if="activeSection === item.toLowerCase()"
               class="absolute inset-0 border border-cyan-400/50 bg-cyan-400/10"
               style="clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))"
             />
           </button>
+
+          <!-- Language Switcher (Desktop) -->
+          <div class="flex items-center gap-2 border-l border-slate-700 pl-4">
+            <button 
+              @click="setLocale('en')" 
+              class="w-6 h-4 hover:scale-110 transition-transform"
+              :class="{ 'ring-2 ring-cyan-400': locale === 'en' }"
+            >
+              <img src="/icons/usa.svg" alt="English" class="w-full h-full object-cover flag-icon" />
+            </button>
+            <button 
+              @click="setLocale('es')" 
+              class="w-6 h-4 hover:scale-110 transition-transform"
+              :class="{ 'ring-2 ring-cyan-400': locale === 'es' }"
+            >
+              <img src="/icons/mx.svg" alt="Español" class="w-full h-full object-cover flag-icon" />
+            </button>
+          </div>
         </div>
 
         <!-- Mobile Menu Button -->
@@ -98,8 +116,28 @@
             class="relative px-4 py-3 text-left text-sm tracking-wider transition-all duration-300"
             :class="activeSection === item.toLowerCase() ? 'text-cyan-400 bg-cyan-400/10 border-l-2 border-cyan-400' : 'text-slate-400 hover:text-fuchsia-400 hover:bg-fuchsia-400/5'"
           >
-            {{ item }}
+            {{ $t(item) }}
           </button>
+          
+          <!-- Language Switch (Mobile) -->
+          <div class="flex items-center gap-4 px-4 py-2 mt-2 border-t border-slate-800">
+             <button 
+              @click="setLocale('en'); mobileMenuOpen = false" 
+              class="flex items-center gap-2 text-xs tracking-wider"
+              :class="locale === 'en' ? 'text-cyan-400' : 'text-slate-400'"
+            >
+              <img src="/icons/usa.svg" alt="English" class="w-6 h-4 object-cover flag-icon" />
+              ENGLISH
+            </button>
+            <button 
+              @click="setLocale('es'); mobileMenuOpen = false" 
+              class="flex items-center gap-2 text-xs tracking-wider"
+              :class="locale === 'es' ? 'text-cyan-400' : 'text-slate-400'"
+            >
+              <img src="/icons/mx.svg" alt="Español" class="w-6 h-4 object-cover flag-icon" />
+              ESPAÑOL
+            </button>
+          </div>
         </div>
       </div>
     </nav>
@@ -145,7 +183,7 @@
             <div class="hero-status flex items-center gap-3">
               <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping" />
               <img src="/icons/ui/robot-2.svg" alt="status" class="w-4 h-4" />
-              <span class="text-cyan-400 text-xs tracking-widest">SYSTEM ONLINE</span>
+              <span class="text-cyan-400 text-xs tracking-widest">{{ $t('HERO.STATUS') }}</span>
             </div>
 
             <!-- Main title with glitch effect -->
@@ -161,7 +199,7 @@
               </h1>
               <p class="text-base sm:text-lg md:text-xl text-slate-400">
                 <span class="text-cyan-400">&lt;</span>
-                SOFTWARE_ENGINEER
+                {{ $t('HERO.ROLE') }}
                 <span class="text-cyan-400">/&gt;</span>
               </p>
             </div>
@@ -191,7 +229,7 @@
                 class="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white text-sm sm:text-base font-bold tracking-wider relative overflow-hidden group cursor-pointer"
                 style="clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))"
               >
-                <span class="relative z-10">START_GAME</span>
+                <span class="relative z-10">{{ $t('HERO.START_GAME') }}</span>
                 <div class="absolute inset-0 bg-gradient-to-r from-cyan-400 to-fuchsia-500 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
               </button>
               <button
@@ -199,7 +237,7 @@
                 class="px-6 sm:px-8 py-3 sm:py-4 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base font-bold tracking-wider hover:bg-cyan-400/10 transition-colors cursor-pointer"
                 style="clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))"
               >
-                VIEW_STATS
+                {{ $t('HERO.VIEW_STATS') }}
               </button>
             </div>
           </div>
@@ -229,7 +267,7 @@
               <!-- Health bar -->
               <div class="mt-3 sm:mt-4 space-y-2">
                 <div class="flex items-center justify-between text-xs">
-                  <span class="text-fuchsia-400">HP</span>
+                  <span class="text-fuchsia-400">{{ $t('HERO.HP') }}</span>
                   <span class="text-slate-400">{{ health }}/100</span>
                 </div>
                 <div class="h-2 bg-slate-800 overflow-hidden">
@@ -251,7 +289,7 @@
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-cyan-400">[</span>
             <img src="/icons/ui/cyborg.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2 icon-fuchsia" alt="icon" />
-            WORK_HISTORY
+            {{ $t('SECTIONS.WORK.TITLE') }}
             <span class="text-cyan-400">]</span>
           </h2>
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
@@ -303,7 +341,7 @@
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-fuchsia-400">[</span>
             <img src="/icons/ui/hammer.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2" alt="icon" />
-            SKILL_TREE
+            {{ $t('SECTIONS.SKILLS.TITLE') }}
             <span class="text-fuchsia-400">]</span>
           </h2>
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent" />
@@ -332,7 +370,7 @@
             <!-- XP Bar -->
             <div class="space-y-1">
               <div class="flex items-center justify-between text-xs">
-                <span class="text-slate-500">XP</span>
+                <span class="text-slate-500">{{ $t('SECTIONS.SKILLS.XP') }}</span>
                 <span class="text-cyan-400">{{ skill.level }}/100</span>
               </div>
               <div class="h-1.5 bg-slate-800 overflow-hidden">
@@ -356,7 +394,7 @@
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-cyan-400">[</span>
             <img src="/icons/ui/ghost.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2 icon-fuchsia" alt="icon" />
-            QUEST_LOG
+            {{ $t('SECTIONS.QUESTS.TITLE') }}
             <span class="text-cyan-400">]</span>
           </h2>
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
@@ -365,7 +403,7 @@
         <!-- Instructions -->
         <div class="mb-6 sm:mb-8 p-3 sm:p-4 border border-cyan-400/30 bg-cyan-400/5 text-center">
           <p class="text-xs sm:text-sm text-cyan-400">
-            <span class="text-fuchsia-400">▸</span> <span class="hidden sm:inline">Click "VIEW DEMO" to see live projects or expand to view tech stack</span><span class="sm:hidden">Tap "VIEW DEMO" or expand for details</span> <span class="text-fuchsia-400">◂</span>
+            <span class="text-fuchsia-400">▸</span> <span class="hidden sm:inline">{{ $t('SECTIONS.QUESTS.INSTRUCTIONS') }}</span><span class="sm:hidden">{{ $t('SECTIONS.QUESTS.INSTRUCTIONS_MOBILE') }}</span> <span class="text-fuchsia-400">◂</span>
           </p>
         </div>
 
@@ -391,7 +429,7 @@
                   class="w-8 h-8 sm:w-10 sm:h-10 object-contain ml-2 transition-all duration-300 animate-bounce-custom" 
                 />
                 <span v-else-if="project.completed" class="text-cyan-400 text-xl sm:text-2xl">✓</span>
-                <span v-else class="text-fuchsia-400 text-xs sm:text-sm">ACTIVE</span>
+                <span v-else class="text-fuchsia-400 text-xs sm:text-sm">{{ $t('SECTIONS.QUESTS.ACTIVE') }}</span>
               </div>
 
               <div class="flex-1 min-w-0">
@@ -410,7 +448,7 @@
               <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3 sm:gap-4">
                 <!-- XP Reward -->
                 <div class="text-left sm:text-right shrink-0">
-                  <div class="text-[10px] sm:text-xs text-slate-500">REWARD</div>
+                  <div class="text-[10px] sm:text-xs text-slate-500">{{ $t('SECTIONS.QUESTS.REWARD') }}</div>
                   <div class="text-sm sm:text-lg font-bold text-fuchsia-400">+{{ project.xp }} XP</div>
                 </div>
 
@@ -423,7 +461,7 @@
                     class="px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-600 to-cyan-500 text-white text-[10px] sm:text-xs font-bold tracking-wider hover:from-cyan-500 hover:to-cyan-400 transition-all relative overflow-hidden group whitespace-nowrap"
                     style="clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))"
                   >
-                    <span class="relative z-10">VIEW DEMO</span>
+                    <span class="relative z-10">{{ $t('SECTIONS.QUESTS.VIEW_DEMO') }}</span>
                     <div class="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-cyan-400 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
                   </button>
                 </div>
@@ -456,7 +494,7 @@
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-cyan-400">[</span>
             <img src="/icons/ui/smile-eyes-2.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2 icon-fuchsia" alt="icon" />
-            CREDENTIALS_LOG
+            {{ $t('SECTIONS.CREDENTIALS.TITLE') }}
             <span class="text-cyan-400">]</span>
           </h2>
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
@@ -466,7 +504,7 @@
           <!-- Education Section -->
           <div>
             <h3 class="text-base sm:text-lg font-bold text-fuchsia-400 mb-4 flex items-center gap-2">
-              <span class="text-cyan-400">▸</span> EDUCATION
+              <span class="text-cyan-400">▸</span> {{ $t('SECTIONS.CREDENTIALS.EDUCATION') }}
             </h3>
             <div class="grid gap-4 sm:gap-6">
               <div
@@ -503,7 +541,7 @@
           <!-- Certifications Section -->
           <div>
             <h3 class="text-base sm:text-lg font-bold text-fuchsia-400 mb-4 flex items-center gap-2">
-              <span class="text-cyan-400">▸</span> CERTIFICATIONS
+              <span class="text-cyan-400">▸</span> {{ $t('SECTIONS.CREDENTIALS.CERTIFICATIONS') }}
             </h3>
             <div class="grid sm:grid-cols-2 gap-4 sm:gap-6">
               <div
@@ -532,7 +570,7 @@
                       {{ credential.period }}
                     </span>
                     <span v-if="credential.credentialId" class="text-cyan-400/70 font-mono">
-                      ID: {{ credential.credentialId }}
+                      {{ $t('SECTIONS.CREDENTIALS.ID') }}: {{ credential.credentialId }}
                     </span>
                   </div>
 
@@ -554,13 +592,13 @@
       </section>
 
       <!-- Contact Section -->
-      <section id="connect" class="max-w-6xl mx-auto py-12 sm:py-16 md:py-24 pb-32 sm:pb-32">
+      <section id="connect" class="max-w-6xl mx-auto py-12 sm:py-16 md:py-24 pb-44 sm:pb-32">
         <div class="section-title flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-pink-400">[</span>
             <img src="/icons/ui/cat.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2" alt="icon" />
-            CONNECT
+            {{ $t('SECTIONS.CONNECT.TITLE') }}
             <span class="text-pink-400">]</span>
           </h2>
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
@@ -602,17 +640,17 @@
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 text-[10px] sm:text-xs text-slate-500">
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="text-fuchsia-400">◆</span>
-          <span>SYSTEM v3</span>
+          <span>{{ $t('FOOTER.SYSTEM') }}</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-4">
-          <span class="hidden sm:inline">CREDITS: ∞</span>
+          <span class="hidden sm:inline">{{ $t('FOOTER.CREDITS') }}: ∞</span>
           <span class="text-cyan-400 hidden sm:inline">|</span>
-          <span class="text-center">BUILT WITH <span class="hidden sm:inline">VUE + TAILWIND</span><span class="sm:hidden">NUXT</span></span>
+          <span class="text-center">{{ $t('FOOTER.BUILT_WITH') }} <span class="hidden sm:inline">VUE + TAILWIND</span><span class="sm:hidden">NUXT</span></span>
         </div>
         <div class="hidden sm:block">
-           <a href="https://nucleoapp.com/app/" target="_blank" class="hover:text-cyan-400 transition-colors">ICONS BY NUCLEO</a>
+           <a href="https://nucleoapp.com/app/" target="_blank" class="hover:text-cyan-400 transition-colors">{{ $t('FOOTER.ICONS_BY') }}</a>
            <span class="mx-2 text-slate-700">|</span>
-           <a href="https://www.youtube.com/@FreeMusicc" target="_blank" class="hover:text-fuchsia-400 transition-colors">MUSIC BY FREEMUSICC</a>
+           <a href="https://www.youtube.com/@FreeMusicc" target="_blank" class="hover:text-fuchsia-400 transition-colors">{{ $t('FOOTER.MUSIC_BY') }}</a>
         </div>
       </div>
     </footer>
@@ -655,7 +693,7 @@
                {{ tracks[currentTrackIndex].name }}
              </span>
              <span class="text-[8px] text-fuchsia-400">
-               {{ isPlaying ? 'PLAYING' : 'PAUSED' }}
+               {{ isPlaying ? $t('MUSIC_PLAYER.PLAYING') : $t('MUSIC_PLAYER.PAUSED') }}
              </span>
           </div>
 
@@ -689,6 +727,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useI18n } from 'vue-i18n'
 
 import { Howl, Howler } from 'howler'
 
@@ -703,6 +742,8 @@ useHead({
     { name: 'description', content: 'Pablo Cabrera - Full Stack Developer specializing in Vue.js, React, Django, and modern web technologies. Professional portfolio.' }
   ]
 })
+
+const { locale, setLocale } = useI18n()
 
 const navItems = ['HOME', 'WORK', 'SKILLS', 'QUESTS', 'CREDENTIALS', 'CONNECT']
 const activeSection = ref('home')
@@ -834,7 +875,7 @@ const projects = ref([
     opacity: 1
   },
   {
-    name: 'ECOMMERCE DEMO FRONTEND',
+    name: 'ECOMMERCE_DEMO_FRONTEND',
     type: 'SIDE_QUEST',
     description: 'Ecommerce demo frontend',
     tech: ['Nuxtjs', 'TailwindCSS'],
@@ -846,7 +887,7 @@ const projects = ref([
     opacity: 1
   },
   {
-    name: 'ECOMMERCE DEMO BACKEND',
+    name: 'ECOMMERCE_DEMO_BACKEND',
     type: 'SIDE_QUEST',
     description: 'Demo of api server admin in Django',
     tech: ['DJANGO', 'POSTGRESQL'],
@@ -1124,33 +1165,12 @@ onMounted(() => {
   randomizeProjectIcons()
   projectInterval.value = setInterval(randomizeProjectIcons, 1000)
 
-  randomizeProjectIcons()
-  projectInterval.value = setInterval(randomizeProjectIcons, 1000)
+
 
   // Initialize audio but don't play yet (browser policy)
   initAudio()
 
-  // Attempt auto-play with interaction fallback
-  const startAudioContext = () => {
-    if (sound.value && !isPlaying.value) {
-      sound.value.play()
-      isPlaying.value = true
-      document.removeEventListener('click', startAudioContext)
-      document.removeEventListener('keydown', startAudioContext)
-    }
-  }
 
-  // Try playing immediately (might fail if no interaction)
-  try {
-     sound.value.play()
-     isPlaying.value = true
-  } catch (e) {
-     console.log('Auto-play blocked, waiting for interaction')
-  }
-
-  // Add listeners for first interaction
-  document.addEventListener('click', startAudioContext)
-  document.addEventListener('keydown', startAudioContext)
 
 
 
@@ -1350,12 +1370,12 @@ onUnmounted(() => {
 }
 
 /* Style SVG icons with cyberpunk colors */
-img[src$='.svg'] {
+img[src$='.svg']:not(.flag-icon) {
   filter: brightness(0) saturate(100%) invert(73%) sepia(55%) saturate(458%) hue-rotate(142deg) brightness(97%) contrast(92%);
   transition: filter 0.3s ease;
 }
 
-.group:hover img[src$='.svg'] {
+.group:hover img[src$='.svg']:not(.flag-icon) {
   filter: brightness(0) saturate(100%) invert(57%) sepia(89%) saturate(6373%) hue-rotate(290deg) brightness(101%) contrast(101%);
 }
 
@@ -1387,7 +1407,7 @@ img[src$='.svg'] {
 }
 
 /* Custom Cursor */
-* {
+/* * {
   cursor: url('/icons/ui/mouse/cursor-custom.svg'), auto !important;
-}
+} */
 </style>
