@@ -39,7 +39,10 @@
     />
 
     <!-- Navigation HUD -->
-    <nav class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 py-4 bg-slate-950/80 backdrop-blur-sm">
+    <nav 
+      class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 py-4 bg-slate-950/80 backdrop-blur-sm transition-transform duration-300"
+      :class="isNavVisible ? 'translate-y-0' : '-translate-y-full'"
+    >
       <div class="max-w-6xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="w-3 h-3 bg-fuchsia-500 animate-pulse" style="clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" />
@@ -551,7 +554,7 @@
       </section>
 
       <!-- Contact Section -->
-      <section id="connect" class="max-w-6xl mx-auto py-12 sm:py-16 md:py-24 pb-24 sm:pb-32">
+      <section id="connect" class="max-w-6xl mx-auto py-12 sm:py-16 md:py-24 pb-32 sm:pb-32">
         <div class="section-title flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
@@ -599,7 +602,7 @@
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 text-[10px] sm:text-xs text-slate-500">
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="text-fuchsia-400">◆</span>
-          <span>SYSTEM v2.1</span>
+          <span>SYSTEM v3</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="hidden sm:inline">CREDITS: ∞</span>
@@ -608,9 +611,77 @@
         </div>
         <div class="hidden sm:block">
            <a href="https://nucleoapp.com/app/" target="_blank" class="hover:text-cyan-400 transition-colors">ICONS BY NUCLEO</a>
+           <span class="mx-2 text-slate-700">|</span>
+           <a href="https://www.youtube.com/@FreeMusicc" target="_blank" class="hover:text-fuchsia-400 transition-colors">MUSIC BY FREEMUSICC</a>
         </div>
       </div>
     </footer>
+
+    <!-- Music Player HUD -->
+    <div class="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+      <!-- Toggle Button -->
+      <button 
+        @click="isPlayerOpen = !isPlayerOpen"
+        class="w-10 h-10 flex items-center justify-center bg-slate-900/90 border border-cyan-400/50 rounded-full hover:bg-cyan-400/20 transition-all duration-300"
+      >
+        <span class="text-xl animate-pulse" v-if="isPlaying">🎵</span>
+        <span class="text-xl" v-else>🔇</span>
+      </button>
+
+      <!-- Expanded Player -->
+      <transition 
+        enter-active-class="transform transition ease-out duration-300"
+        enter-from-class="translate-y-4 opacity-0"
+        enter-to-class="translate-y-0 opacity-100"
+        leave-active-class="transform transition ease-in duration-200"
+        leave-from-class="translate-y-0 opacity-100"
+        leave-to-class="translate-y-4 opacity-0"
+      >
+        <div 
+          v-if="isPlayerOpen"
+          class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 p-3 bg-slate-900/90 border border-fuchsia-500/50 backdrop-blur-md w-40 sm:w-auto transition-all"
+          style="clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)"
+        >
+          <!-- Visualizer Bars (Animated) -->
+          <div class="flex items-end gap-1 h-4">
+            <div class="w-1 bg-cyan-400 animate-pulse" :style="{ height: isPlaying ? '100%' : '20%', animationDuration: '0.4s' }" />
+            <div class="w-1 bg-fuchsia-400 animate-pulse" :style="{ height: isPlaying ? '60%' : '20%', animationDuration: '0.6s' }" />
+            <div class="w-1 bg-cyan-400 animate-pulse" :style="{ height: isPlaying ? '80%' : '20%', animationDuration: '0.3s' }" />
+            <div class="w-1 bg-fuchsia-400 animate-pulse" :style="{ height: isPlaying ? '40%' : '20%', animationDuration: '0.5s' }" />
+          </div>
+
+          <div class="flex flex-col items-center sm:items-start text-center sm:text-left overflow-hidden w-full sm:w-auto">
+             <span class="text-[10px] text-cyan-400 font-bold tracking-wider w-full truncate">
+               {{ tracks[currentTrackIndex].name }}
+             </span>
+             <span class="text-[8px] text-fuchsia-400">
+               {{ isPlaying ? 'PLAYING' : 'PAUSED' }}
+             </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button @click="togglePlay" class="w-8 h-8 flex items-center justify-center border border-slate-600 hover:border-cyan-400 hover:text-cyan-400 transition-colors">
+              <span v-if="!isPlaying">▶</span>
+              <span v-else>❚❚</span>
+            </button>
+            <button @click="nextTrack" class="w-8 h-8 flex items-center justify-center border border-slate-600 hover:border-fuchsia-400 hover:text-fuchsia-400 transition-colors">
+              ⏭
+            </button>
+          </div>
+          
+          <!-- Volume Control -->
+          <input 
+            type="range" 
+            min="0" 
+            max="1" 
+            step="0.05" 
+            v-model="volume"
+            @input="updateVolume"
+            class="w-full sm:w-16 accent-cyan-400"
+          />
+        </div>
+      </transition>
+    </div>
   </div>
 </template>
 
@@ -618,6 +689,8 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+import { Howl, Howler } from 'howler'
 
 // Register GSAP plugins
 if (process.client) {
@@ -644,6 +717,33 @@ const mobileMenuOpen = ref(false)
 const displayedName = ref('')
 const fullName = 'PABLO CABRERA'
 const projectInterval = ref(null)
+
+// Music Player State
+const isPlayerOpen = ref(false)
+const isPlaying = ref(false)
+const currentTrackIndex = ref(0)
+const volume = ref(0.2) // Start at 20%
+const sound = ref(null)
+
+// Navbar State
+const isNavVisible = ref(true)
+const lastScrollPosition = ref(0)
+const tracks = [
+  { name: 'AdhesiveWombat - Night Shade', path: '/music/AdhesiveWombat - Night Shade.mp3' },
+  { name: 'Jeremy Blake - Powerup!', path: '/music/Jeremy Blake - Powerup!.mp3' },
+  { name: 'Kevin MacLeod - 8bit Dungeon Boss', path: '/music/Kevin MacLeod - 8bit Dungeon Boss.mp3' }
+]
+
+const initAudio = () => {
+    sound.value = new Howl({
+      src: [tracks[currentTrackIndex.value].path],
+      html5: true,
+      volume: volume.value,
+      onend: () => {
+        nextTrack()
+      }
+    })
+  }
 
 const stats = [
   { label: 'PROJECTS', value: '50+', icon: '/icons/ui/calendar.svg' },
@@ -794,6 +894,7 @@ const credentials = [
     title: 'Working with Data',
     institution: 'Meta',
     period: 'JAN 2026',
+    skills: ['SQL', 'JSON', 'APIs'],
     credentialId: 'QLM16WJACL1R',
     image: '/images/certs/meta_logo.png'
   },
@@ -803,6 +904,7 @@ const credentials = [
     institution: 'LearnKartS',
     period: 'MAY 2025',
     credentialId: 'N32R63CR6U8W',
+    skills: ['CI/CD', 'Jenkins'],
     image: '/images/certs/learnkarts_logo.png'
   },
   {
@@ -810,6 +912,7 @@ const credentials = [
     title: 'DevOps and Jenkins Fundamentals',
     institution: 'LearnKartS',
     period: 'MAY 2025',
+    skills: ['DevOps', 'Jenkins'],
     credentialId: '6D9VKRZQ2K6K',
     image: '/images/certs/learnkarts_logo.png'
   },
@@ -845,6 +948,7 @@ const credentials = [
     title: 'Version Control',
     institution: 'Meta',
     period: 'NOV 2024',
+    skills: ['Git', 'GitHub', 'GitLabs'],
     credentialId: 'LPZF8LWB4K2K',
     image: '/images/certs/meta_logo.png'
   },
@@ -853,6 +957,7 @@ const credentials = [
     title: 'Programming with JavaScript',
     institution: 'Meta',
     period: 'NOV 2024',
+    skills: ['JavaScript', 'HTML5', 'CSS'],
     credentialId: '1JO6B9UW2MTE',
     image: '/images/certs/meta_logo.png'
   },
@@ -861,6 +966,7 @@ const credentials = [
     title: 'React Basics',
     institution: 'Meta',
     period: 'NOV 2024',
+    skills: ['React', 'JavaScript', 'HTML5', 'CSS'],
     credentialId: 'WYDPPD1X5E7A',
     image: '/images/certs/meta_logo.png'
   },
@@ -869,6 +975,7 @@ const credentials = [
     title: 'Introduction to Mobile Development',
     institution: 'Meta',
     period: 'NOV 2024',
+    skills: ['React Native', 'Android Studio', 'iOS'],
     credentialId: 'BY5NCO4NL97L',
     image: '/images/certs/meta_logo.png'
   },
@@ -877,6 +984,7 @@ const credentials = [
     title: 'React Native',
     institution: 'Meta',
     period: 'NOV 2023',
+    skills: ['React Native'],
     credentialId: '3VJTVXZAS04W',
     image: '/images/certs/meta_logo.png'
   }
@@ -922,7 +1030,51 @@ const openProjectDemo = (redirect) => {
   }
 }
 
+  const updateVolume = () => {
+    if (sound.value) {
+      sound.value.volume(volume.value)
+    }
+  }
+
+  const togglePlay = () => {
+    if (!sound.value) return
+    
+    if (isPlaying.value) {
+      sound.value.pause()
+    } else {
+      sound.value.play()
+    }
+    isPlaying.value = !isPlaying.value
+  }
+
+  const nextTrack = () => {
+    if (sound.value) {
+       sound.value.stop()
+       sound.value.unload()
+    }
+    
+    currentTrackIndex.value = (currentTrackIndex.value + 1) % tracks.length
+    
+    // Slight delay to ensure clean transition
+    setTimeout(() => {
+        initAudio()
+        sound.value.play()
+        isPlaying.value = true
+    }, 100)
+  }
+
+
 const handleScroll = () => {
+  const currentScrollPosition = window.scrollY
+  
+  // Auto-hide navbar logic
+  if (currentScrollPosition < lastScrollPosition.value || currentScrollPosition < 50) {
+    isNavVisible.value = true
+  } else if (currentScrollPosition > lastScrollPosition.value && currentScrollPosition > 300) {
+    isNavVisible.value = false
+  }
+  lastScrollPosition.value = currentScrollPosition
+
   scrollY.value = window.scrollY
 
   // Update active section based on scroll position
@@ -971,6 +1123,35 @@ onMounted(() => {
 
   randomizeProjectIcons()
   projectInterval.value = setInterval(randomizeProjectIcons, 1000)
+
+  randomizeProjectIcons()
+  projectInterval.value = setInterval(randomizeProjectIcons, 1000)
+
+  // Initialize audio but don't play yet (browser policy)
+  initAudio()
+
+  // Attempt auto-play with interaction fallback
+  const startAudioContext = () => {
+    if (sound.value && !isPlaying.value) {
+      sound.value.play()
+      isPlaying.value = true
+      document.removeEventListener('click', startAudioContext)
+      document.removeEventListener('keydown', startAudioContext)
+    }
+  }
+
+  // Try playing immediately (might fail if no interaction)
+  try {
+     sound.value.play()
+     isPlaying.value = true
+  } catch (e) {
+     console.log('Auto-play blocked, waiting for interaction')
+  }
+
+  // Add listeners for first interaction
+  document.addEventListener('click', startAudioContext)
+  document.addEventListener('keydown', startAudioContext)
+
 
 
   // GSAP Animations
@@ -1188,5 +1369,25 @@ img[src$='.svg'] {
 }
 .animate-bounce-custom {
   animation: bounce-custom 2s infinite ease-in-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a; /* slate-900 */
+}
+::-webkit-scrollbar-thumb {
+  background: #06b6d4; /* cyan-500 */
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d946ef; /* fuchsia-500 */
+}
+
+/* Custom Cursor */
+* {
+  cursor: url('/icons/ui/mouse/cursor-custom.svg'), auto !important;
 }
 </style>
