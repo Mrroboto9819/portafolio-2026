@@ -50,7 +50,7 @@
         </div>
 
         <!-- Desktop Navigation -->
-        <div class="hidden md:flex items-center gap-4 lg:gap-6">
+        <div class="hidden xl:flex items-center gap-4 lg:gap-6">
           <button
             v-for="(item, index) in navItems"
             :key="item"
@@ -88,7 +88,7 @@
         <!-- Mobile Menu Button -->
         <button
           @click="mobileMenuOpen = !mobileMenuOpen"
-          class="md:hidden p-2 text-cyan-400 hover:text-fuchsia-400 transition-colors"
+          class="xl:hidden p-2 text-cyan-400 hover:text-fuchsia-400 transition-colors"
         >
           <div class="w-6 h-5 flex flex-col justify-between">
             <span class="w-full h-0.5 bg-current transition-all" :class="mobileMenuOpen ? 'rotate-45 translate-y-2' : ''" />
@@ -97,7 +97,7 @@
           </div>
         </button>
 
-        <div class="hidden md:flex items-center gap-2 text-xs text-slate-500">
+        <div class="hidden xl:flex items-center gap-2 text-xs text-slate-500">
           <span>LVL</span>
           <span class="text-cyan-400 font-bold">42</span>
         </div>
@@ -106,7 +106,7 @@
       <!-- Mobile Menu -->
       <div
         v-show="mobileMenuOpen"
-        class="md:hidden mt-4 border-t border-slate-700/50 pt-4"
+        class="xl:hidden mt-4 border-t border-slate-700/50 pt-4"
       >
         <div class="flex flex-col gap-2">
           <button
