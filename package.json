@@ -10,8 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxtjs/i18n": "^10.2.1",
     "@tailwindcss/vite": "^4.1.18",
     "gsap": "^3.14.2",
+    "howler": "^2.2.4",
     "nuxt": "^4.2.2",
     "tailwindcss": "^4.1.18",
     "vue": "^3.5.26",

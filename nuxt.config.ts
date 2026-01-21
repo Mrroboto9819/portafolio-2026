@@ -3,11 +3,21 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  modules: ['@nuxtjs/i18n'],
   css: ['./app/assets/css/main.css'],
   vite: {
     plugins: [
       tailwindcss(),
     ],
+  },
+  i18n: {
+    locales: [
+      { code: 'en', name: 'English', file: 'en.json' },
+      { code: 'es', name: 'Espanol', file: 'es.json' }
+    ],
+    defaultLocale: 'en',
+    strategy: 'prefix_except_default',
+    langDir: 'locales',
   },
   app: {
     head: {

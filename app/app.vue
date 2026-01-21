@@ -39,7 +39,10 @@
     />
 
     <!-- Navigation HUD -->
-    <nav class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 py-4 bg-slate-950/80 backdrop-blur-sm">
+    <nav 
+      class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 py-4 bg-slate-950/80 backdrop-blur-sm transition-transform duration-300"
+      :class="isNavVisible ? 'translate-y-0' : '-translate-y-full'"
+    >
       <div class="max-w-6xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="w-3 h-3 bg-fuchsia-500 animate-pulse" style="clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" />
@@ -55,13 +58,31 @@
             class="relative px-3 lg:px-4 py-2 text-xs tracking-wider transition-all duration-300 group"
             :class="activeSection === item.toLowerCase() ? 'text-cyan-400' : 'text-slate-400 hover:text-fuchsia-400'"
           >
-            <span class="relative z-10">{{ item }}</span>
+            <span class="relative z-10">{{ $t(item) }}</span>
             <div
               v-if="activeSection === item.toLowerCase()"
               class="absolute inset-0 border border-cyan-400/50 bg-cyan-400/10"
               style="clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))"
             />
           </button>
+
+          <!-- Language Switcher (Desktop) -->
+          <div class="flex items-center gap-2 border-l border-slate-700 pl-4">
+            <button 
+              @click="setLocale('en')" 
+              class="w-6 h-4 hover:scale-110 transition-transform"
+              :class="{ 'ring-2 ring-cyan-400': locale === 'en' }"
+            >
+              <img src="/icons/usa.svg" alt="English" class="w-full h-full object-cover flag-icon" />
+            </button>
+            <button 
+              @click="setLocale('es')" 
+              class="w-6 h-4 hover:scale-110 transition-transform"
+              :class="{ 'ring-2 ring-cyan-400': locale === 'es' }"
+            >
+              <img src="/icons/mx.svg" alt="Español" class="w-full h-full object-cover flag-icon" />
+            </button>
+          </div>
         </div>
 
         <!-- Mobile Menu Button -->
@@ -95,8 +116,28 @@
             class="relative px-4 py-3 text-left text-sm tracking-wider transition-all duration-300"
             :class="activeSection === item.toLowerCase() ? 'text-cyan-400 bg-cyan-400/10 border-l-2 border-cyan-400' : 'text-slate-400 hover:text-fuchsia-400 hover:bg-fuchsia-400/5'"
           >
-            {{ item }}
+            {{ $t(item) }}
           </button>
+          
+          <!-- Language Switch (Mobile) -->
+          <div class="flex items-center gap-4 px-4 py-2 mt-2 border-t border-slate-800">
+             <button 
+              @click="setLocale('en'); mobileMenuOpen = false" 
+              class="flex items-center gap-2 text-xs tracking-wider"
+              :class="locale === 'en' ? 'text-cyan-400' : 'text-slate-400'"
+            >
+              <img src="/icons/usa.svg" alt="English" class="w-6 h-4 object-cover flag-icon" />
+              ENGLISH
+            </button>
+            <button 
+              @click="setLocale('es'); mobileMenuOpen = false" 
+              class="flex items-center gap-2 text-xs tracking-wider"
+              :class="locale === 'es' ? 'text-cyan-400' : 'text-slate-400'"
+            >
+              <img src="/icons/mx.svg" alt="Español" class="w-6 h-4 object-cover flag-icon" />
+              ESPAÑOL
+            </button>
+          </div>
         </div>
       </div>
     </nav>
@@ -142,7 +183,7 @@
             <div class="hero-status flex items-center gap-3">
               <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping" />
               <img src="/icons/ui/robot-2.svg" alt="status" class="w-4 h-4" />
-              <span class="text-cyan-400 text-xs tracking-widest">SYSTEM ONLINE</span>
+              <span class="text-cyan-400 text-xs tracking-widest">{{ $t('HERO.STATUS') }}</span>
             </div>
 
             <!-- Main title with glitch effect -->
@@ -158,7 +199,7 @@
               </h1>
               <p class="text-base sm:text-lg md:text-xl text-slate-400">
                 <span class="text-cyan-400">&lt;</span>
-                SOFTWARE_ENGINEER
+                {{ $t('HERO.ROLE') }}
                 <span class="text-cyan-400">/&gt;</span>
               </p>
             </div>
@@ -188,7 +229,7 @@
                 class="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white text-sm sm:text-base font-bold tracking-wider relative overflow-hidden group cursor-pointer"
                 style="clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))"
               >
-                <span class="relative z-10">START_GAME</span>
+                <span class="relative z-10">{{ $t('HERO.START_GAME') }}</span>
                 <div class="absolute inset-0 bg-gradient-to-r from-cyan-400 to-fuchsia-500 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
               </button>
               <button
@@ -196,7 +237,7 @@
                 class="px-6 sm:px-8 py-3 sm:py-4 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base font-bold tracking-wider hover:bg-cyan-400/10 transition-colors cursor-pointer"
                 style="clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))"
               >
-                VIEW_STATS
+                {{ $t('HERO.VIEW_STATS') }}
               </button>
             </div>
           </div>
@@ -226,7 +267,7 @@
               <!-- Health bar -->
               <div class="mt-3 sm:mt-4 space-y-2">
                 <div class="flex items-center justify-between text-xs">
-                  <span class="text-fuchsia-400">HP</span>
+                  <span class="text-fuchsia-400">{{ $t('HERO.HP') }}</span>
                   <span class="text-slate-400">{{ health }}/100</span>
                 </div>
                 <div class="h-2 bg-slate-800 overflow-hidden">
@@ -248,7 +289,7 @@
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-cyan-400">[</span>
             <img src="/icons/ui/cyborg.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2 icon-fuchsia" alt="icon" />
-            WORK_HISTORY
+            {{ $t('SECTIONS.WORK.TITLE') }}
             <span class="text-cyan-400">]</span>
           </h2>
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
@@ -300,7 +341,7 @@
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-fuchsia-400">[</span>
             <img src="/icons/ui/hammer.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2" alt="icon" />
-            SKILL_TREE
+            {{ $t('SECTIONS.SKILLS.TITLE') }}
             <span class="text-fuchsia-400">]</span>
           </h2>
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent" />
@@ -329,7 +370,7 @@
             <!-- XP Bar -->
             <div class="space-y-1">
               <div class="flex items-center justify-between text-xs">
-                <span class="text-slate-500">XP</span>
+                <span class="text-slate-500">{{ $t('SECTIONS.SKILLS.XP') }}</span>
                 <span class="text-cyan-400">{{ skill.level }}/100</span>
               </div>
               <div class="h-1.5 bg-slate-800 overflow-hidden">
@@ -353,7 +394,7 @@
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-cyan-400">[</span>
             <img src="/icons/ui/ghost.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2 icon-fuchsia" alt="icon" />
-            QUEST_LOG
+            {{ $t('SECTIONS.QUESTS.TITLE') }}
             <span class="text-cyan-400">]</span>
           </h2>
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
@@ -362,7 +403,7 @@
         <!-- Instructions -->
         <div class="mb-6 sm:mb-8 p-3 sm:p-4 border border-cyan-400/30 bg-cyan-400/5 text-center">
           <p class="text-xs sm:text-sm text-cyan-400">
-            <span class="text-fuchsia-400">▸</span> <span class="hidden sm:inline">Click "VIEW DEMO" to see live projects or expand to view tech stack</span><span class="sm:hidden">Tap "VIEW DEMO" or expand for details</span> <span class="text-fuchsia-400">◂</span>
+            <span class="text-fuchsia-400">▸</span> <span class="hidden sm:inline">{{ $t('SECTIONS.QUESTS.INSTRUCTIONS') }}</span><span class="sm:hidden">{{ $t('SECTIONS.QUESTS.INSTRUCTIONS_MOBILE') }}</span> <span class="text-fuchsia-400">◂</span>
           </p>
         </div>
 
@@ -388,7 +429,7 @@
                   class="w-8 h-8 sm:w-10 sm:h-10 object-contain ml-2 transition-all duration-300 animate-bounce-custom" 
                 />
                 <span v-else-if="project.completed" class="text-cyan-400 text-xl sm:text-2xl">✓</span>
-                <span v-else class="text-fuchsia-400 text-xs sm:text-sm">ACTIVE</span>
+                <span v-else class="text-fuchsia-400 text-xs sm:text-sm">{{ $t('SECTIONS.QUESTS.ACTIVE') }}</span>
               </div>
 
               <div class="flex-1 min-w-0">
@@ -407,7 +448,7 @@
               <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3 sm:gap-4">
                 <!-- XP Reward -->
                 <div class="text-left sm:text-right shrink-0">
-                  <div class="text-[10px] sm:text-xs text-slate-500">REWARD</div>
+                  <div class="text-[10px] sm:text-xs text-slate-500">{{ $t('SECTIONS.QUESTS.REWARD') }}</div>
                   <div class="text-sm sm:text-lg font-bold text-fuchsia-400">+{{ project.xp }} XP</div>
                 </div>
 
@@ -420,7 +461,7 @@
                     class="px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-600 to-cyan-500 text-white text-[10px] sm:text-xs font-bold tracking-wider hover:from-cyan-500 hover:to-cyan-400 transition-all relative overflow-hidden group whitespace-nowrap"
                     style="clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))"
                   >
-                    <span class="relative z-10">VIEW DEMO</span>
+                    <span class="relative z-10">{{ $t('SECTIONS.QUESTS.VIEW_DEMO') }}</span>
                     <div class="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-cyan-400 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
                   </button>
                 </div>
@@ -453,7 +494,7 @@
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-cyan-400">[</span>
             <img src="/icons/ui/smile-eyes-2.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2 icon-fuchsia" alt="icon" />
-            CREDENTIALS_LOG
+            {{ $t('SECTIONS.CREDENTIALS.TITLE') }}
             <span class="text-cyan-400">]</span>
           </h2>
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
@@ -463,7 +504,7 @@
           <!-- Education Section -->
           <div>
             <h3 class="text-base sm:text-lg font-bold text-fuchsia-400 mb-4 flex items-center gap-2">
-              <span class="text-cyan-400">▸</span> EDUCATION
+              <span class="text-cyan-400">▸</span> {{ $t('SECTIONS.CREDENTIALS.EDUCATION') }}
             </h3>
             <div class="grid gap-4 sm:gap-6">
               <div
@@ -500,7 +541,7 @@
           <!-- Certifications Section -->
           <div>
             <h3 class="text-base sm:text-lg font-bold text-fuchsia-400 mb-4 flex items-center gap-2">
-              <span class="text-cyan-400">▸</span> CERTIFICATIONS
+              <span class="text-cyan-400">▸</span> {{ $t('SECTIONS.CREDENTIALS.CERTIFICATIONS') }}
             </h3>
             <div class="grid sm:grid-cols-2 gap-4 sm:gap-6">
               <div
@@ -529,7 +570,7 @@
                       {{ credential.period }}
                     </span>
                     <span v-if="credential.credentialId" class="text-cyan-400/70 font-mono">
-                      ID: {{ credential.credentialId }}
+                      {{ $t('SECTIONS.CREDENTIALS.ID') }}: {{ credential.credentialId }}
                     </span>
                   </div>
 
@@ -551,13 +592,13 @@
       </section>
 
       <!-- Contact Section -->
-      <section id="connect" class="max-w-6xl mx-auto py-12 sm:py-16 md:py-24 pb-24 sm:pb-32">
+      <section id="connect" class="max-w-6xl mx-auto py-12 sm:py-16 md:py-24 pb-44 sm:pb-32">
         <div class="section-title flex items-center gap-2 sm:gap-4 mb-8 sm:mb-12">
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
           <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-center whitespace-nowrap">
             <span class="text-pink-400">[</span>
             <img src="/icons/ui/cat.svg" class="w-6 h-6 sm:w-8 sm:h-8 inline-block mx-2" alt="icon" />
-            CONNECT
+            {{ $t('SECTIONS.CONNECT.TITLE') }}
             <span class="text-pink-400">]</span>
           </h2>
           <div class="h-px flex-1 bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
@@ -599,18 +640,86 @@
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 text-[10px] sm:text-xs text-slate-500">
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="text-fuchsia-400">◆</span>
-          <span>SYSTEM v2.1</span>
+          <span>{{ $t('FOOTER.SYSTEM') }}</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-4">
-          <span class="hidden sm:inline">CREDITS: ∞</span>
+          <span class="hidden sm:inline">{{ $t('FOOTER.CREDITS') }}: ∞</span>
           <span class="text-cyan-400 hidden sm:inline">|</span>
-          <span class="text-center">BUILT WITH <span class="hidden sm:inline">VUE + TAILWIND</span><span class="sm:hidden">NUXT</span></span>
+          <span class="text-center">{{ $t('FOOTER.BUILT_WITH') }} <span class="hidden sm:inline">VUE + TAILWIND</span><span class="sm:hidden">NUXT</span></span>
         </div>
         <div class="hidden sm:block">
-           <a href="https://nucleoapp.com/app/" target="_blank" class="hover:text-cyan-400 transition-colors">ICONS BY NUCLEO</a>
+           <a href="https://nucleoapp.com/app/" target="_blank" class="hover:text-cyan-400 transition-colors">{{ $t('FOOTER.ICONS_BY') }}</a>
+           <span class="mx-2 text-slate-700">|</span>
+           <a href="https://www.youtube.com/@FreeMusicc" target="_blank" class="hover:text-fuchsia-400 transition-colors">{{ $t('FOOTER.MUSIC_BY') }}</a>
         </div>
       </div>
     </footer>
+
+    <!-- Music Player HUD -->
+    <div class="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+      <!-- Toggle Button -->
+      <button 
+        @click="isPlayerOpen = !isPlayerOpen"
+        class="w-10 h-10 flex items-center justify-center bg-slate-900/90 border border-cyan-400/50 rounded-full hover:bg-cyan-400/20 transition-all duration-300"
+      >
+        <span class="text-xl animate-pulse" v-if="isPlaying">🎵</span>
+        <span class="text-xl" v-else>🔇</span>
+      </button>
+
+      <!-- Expanded Player -->
+      <transition 
+        enter-active-class="transform transition ease-out duration-300"
+        enter-from-class="translate-y-4 opacity-0"
+        enter-to-class="translate-y-0 opacity-100"
+        leave-active-class="transform transition ease-in duration-200"
+        leave-from-class="translate-y-0 opacity-100"
+        leave-to-class="translate-y-4 opacity-0"
+      >
+        <div 
+          v-if="isPlayerOpen"
+          class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 p-3 bg-slate-900/90 border border-fuchsia-500/50 backdrop-blur-md w-40 sm:w-auto transition-all"
+          style="clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)"
+        >
+          <!-- Visualizer Bars (Animated) -->
+          <div class="flex items-end gap-1 h-4">
+            <div class="w-1 bg-cyan-400 animate-pulse" :style="{ height: isPlaying ? '100%' : '20%', animationDuration: '0.4s' }" />
+            <div class="w-1 bg-fuchsia-400 animate-pulse" :style="{ height: isPlaying ? '60%' : '20%', animationDuration: '0.6s' }" />
+            <div class="w-1 bg-cyan-400 animate-pulse" :style="{ height: isPlaying ? '80%' : '20%', animationDuration: '0.3s' }" />
+            <div class="w-1 bg-fuchsia-400 animate-pulse" :style="{ height: isPlaying ? '40%' : '20%', animationDuration: '0.5s' }" />
+          </div>
+
+          <div class="flex flex-col items-center sm:items-start text-center sm:text-left overflow-hidden w-full sm:w-auto">
+             <span class="text-[10px] text-cyan-400 font-bold tracking-wider w-full truncate">
+               {{ tracks[currentTrackIndex].name }}
+             </span>
+             <span class="text-[8px] text-fuchsia-400">
+               {{ isPlaying ? $t('MUSIC_PLAYER.PLAYING') : $t('MUSIC_PLAYER.PAUSED') }}
+             </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button @click="togglePlay" class="w-8 h-8 flex items-center justify-center border border-slate-600 hover:border-cyan-400 hover:text-cyan-400 transition-colors">
+              <span v-if="!isPlaying">▶</span>
+              <span v-else>❚❚</span>
+            </button>
+            <button @click="nextTrack" class="w-8 h-8 flex items-center justify-center border border-slate-600 hover:border-fuchsia-400 hover:text-fuchsia-400 transition-colors">
+              ⏭
+            </button>
+          </div>
+          
+          <!-- Volume Control -->
+          <input 
+            type="range" 
+            min="0" 
+            max="1" 
+            step="0.05" 
+            v-model="volume"
+            @input="updateVolume"
+            class="w-full sm:w-16 accent-cyan-400"
+          />
+        </div>
+      </transition>
+    </div>
   </div>
 </template>
 
@@ -618,6 +727,9 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useI18n } from 'vue-i18n'
+
+import { Howl, Howler } from 'howler'
 
 // Register GSAP plugins
 if (process.client) {
@@ -630,6 +742,8 @@ useHead({
     { name: 'description', content: 'Pablo Cabrera - Full Stack Developer specializing in Vue.js, React, Django, and modern web technologies. Professional portfolio.' }
   ]
 })
+
+const { locale, setLocale } = useI18n()
 
 const navItems = ['HOME', 'WORK', 'SKILLS', 'QUESTS', 'CREDENTIALS', 'CONNECT']
 const activeSection = ref('home')
@@ -644,6 +758,33 @@ const mobileMenuOpen = ref(false)
 const displayedName = ref('')
 const fullName = 'PABLO CABRERA'
 const projectInterval = ref(null)
+
+// Music Player State
+const isPlayerOpen = ref(false)
+const isPlaying = ref(false)
+const currentTrackIndex = ref(0)
+const volume = ref(0.2) // Start at 20%
+const sound = ref(null)
+
+// Navbar State
+const isNavVisible = ref(true)
+const lastScrollPosition = ref(0)
+const tracks = [
+  { name: 'AdhesiveWombat - Night Shade', path: '/music/AdhesiveWombat - Night Shade.mp3' },
+  { name: 'Jeremy Blake - Powerup!', path: '/music/Jeremy Blake - Powerup!.mp3' },
+  { name: 'Kevin MacLeod - 8bit Dungeon Boss', path: '/music/Kevin MacLeod - 8bit Dungeon Boss.mp3' }
+]
+
+const initAudio = () => {
+    sound.value = new Howl({
+      src: [tracks[currentTrackIndex.value].path],
+      html5: true,
+      volume: volume.value,
+      onend: () => {
+        nextTrack()
+      }
+    })
+  }
 
 const stats = [
   { label: 'PROJECTS', value: '50+', icon: '/icons/ui/calendar.svg' },
@@ -734,7 +875,7 @@ const projects = ref([
     opacity: 1
   },
   {
-    name: 'ECOMMERCE DEMO FRONTEND',
+    name: 'ECOMMERCE_DEMO_FRONTEND',
     type: 'SIDE_QUEST',
     description: 'Ecommerce demo frontend',
     tech: ['Nuxtjs', 'TailwindCSS'],
@@ -745,18 +886,18 @@ const projects = ref([
     iconStyle: {},
     opacity: 1
   },
-  {
-    name: 'ECOMMERCE DEMO BACKEND',
-    type: 'SIDE_QUEST',
-    description: 'Demo of api server admin in Django',
-    tech: ['DJANGO', 'POSTGRESQL'],
-    xp: 1500,
-    completed: true,
-    redirect: 'https://store-api.pablocabrera.dev/admin/login/',
-    icon: null,
-    iconStyle: {},
-    opacity: 1
-  }
+  // {
+  //   name: 'ECOMMERCE_DEMO_BACKEND',
+  //   type: 'SIDE_QUEST',
+  //   description: 'Demo of api server admin in Django',
+  //   tech: ['DJANGO', 'POSTGRESQL'],
+  //   xp: 1500,
+  //   completed: true,
+  //   redirect: 'https://store-api.pablocabrera.dev/admin/login/',
+  //   icon: null,
+  //   iconStyle: {},
+  //   opacity: 1
+  // }
 ])
 
 const socialLinks = [
@@ -794,6 +935,7 @@ const credentials = [
     title: 'Working with Data',
     institution: 'Meta',
     period: 'JAN 2026',
+    skills: ['SQL', 'JSON', 'APIs'],
     credentialId: 'QLM16WJACL1R',
     image: '/images/certs/meta_logo.png'
   },
@@ -803,6 +945,7 @@ const credentials = [
     institution: 'LearnKartS',
     period: 'MAY 2025',
     credentialId: 'N32R63CR6U8W',
+    skills: ['CI/CD', 'Jenkins'],
     image: '/images/certs/learnkarts_logo.png'
   },
   {
@@ -810,6 +953,7 @@ const credentials = [
     title: 'DevOps and Jenkins Fundamentals',
     institution: 'LearnKartS',
     period: 'MAY 2025',
+    skills: ['DevOps', 'Jenkins'],
     credentialId: '6D9VKRZQ2K6K',
     image: '/images/certs/learnkarts_logo.png'
   },
@@ -845,6 +989,7 @@ const credentials = [
     title: 'Version Control',
     institution: 'Meta',
     period: 'NOV 2024',
+    skills: ['Git', 'GitHub', 'GitLabs'],
     credentialId: 'LPZF8LWB4K2K',
     image: '/images/certs/meta_logo.png'
   },
@@ -853,6 +998,7 @@ const credentials = [
     title: 'Programming with JavaScript',
     institution: 'Meta',
     period: 'NOV 2024',
+    skills: ['JavaScript', 'HTML5', 'CSS'],
     credentialId: '1JO6B9UW2MTE',
     image: '/images/certs/meta_logo.png'
   },
@@ -861,6 +1007,7 @@ const credentials = [
     title: 'React Basics',
     institution: 'Meta',
     period: 'NOV 2024',
+    skills: ['React', 'JavaScript', 'HTML5', 'CSS'],
     credentialId: 'WYDPPD1X5E7A',
     image: '/images/certs/meta_logo.png'
   },
@@ -869,6 +1016,7 @@ const credentials = [
     title: 'Introduction to Mobile Development',
     institution: 'Meta',
     period: 'NOV 2024',
+    skills: ['React Native', 'Android Studio', 'iOS'],
     credentialId: 'BY5NCO4NL97L',
     image: '/images/certs/meta_logo.png'
   },
@@ -877,6 +1025,7 @@ const credentials = [
     title: 'React Native',
     institution: 'Meta',
     period: 'NOV 2023',
+    skills: ['React Native'],
     credentialId: '3VJTVXZAS04W',
     image: '/images/certs/meta_logo.png'
   }
@@ -922,7 +1071,51 @@ const openProjectDemo = (redirect) => {
   }
 }
 
+  const updateVolume = () => {
+    if (sound.value) {
+      sound.value.volume(volume.value)
+    }
+  }
+
+  const togglePlay = () => {
+    if (!sound.value) return
+    
+    if (isPlaying.value) {
+      sound.value.pause()
+    } else {
+      sound.value.play()
+    }
+    isPlaying.value = !isPlaying.value
+  }
+
+  const nextTrack = () => {
+    if (sound.value) {
+       sound.value.stop()
+       sound.value.unload()
+    }
+    
+    currentTrackIndex.value = (currentTrackIndex.value + 1) % tracks.length
+    
+    // Slight delay to ensure clean transition
+    setTimeout(() => {
+        initAudio()
+        sound.value.play()
+        isPlaying.value = true
+    }, 100)
+  }
+
+
 const handleScroll = () => {
+  const currentScrollPosition = window.scrollY
+  
+  // Auto-hide navbar logic
+  if (currentScrollPosition < lastScrollPosition.value || currentScrollPosition < 50) {
+    isNavVisible.value = true
+  } else if (currentScrollPosition > lastScrollPosition.value && currentScrollPosition > 300) {
+    isNavVisible.value = false
+  }
+  lastScrollPosition.value = currentScrollPosition
+
   scrollY.value = window.scrollY
 
   // Update active section based on scroll position
@@ -971,6 +1164,14 @@ onMounted(() => {
 
   randomizeProjectIcons()
   projectInterval.value = setInterval(randomizeProjectIcons, 1000)
+
+
+
+  // Initialize audio but don't play yet (browser policy)
+  initAudio()
+
+
+
 
 
   // GSAP Animations
@@ -1169,12 +1370,12 @@ onUnmounted(() => {
 }
 
 /* Style SVG icons with cyberpunk colors */
-img[src$='.svg'] {
+img[src$='.svg']:not(.flag-icon) {
   filter: brightness(0) saturate(100%) invert(73%) sepia(55%) saturate(458%) hue-rotate(142deg) brightness(97%) contrast(92%);
   transition: filter 0.3s ease;
 }
 
-.group:hover img[src$='.svg'] {
+.group:hover img[src$='.svg']:not(.flag-icon) {
   filter: brightness(0) saturate(100%) invert(57%) sepia(89%) saturate(6373%) hue-rotate(290deg) brightness(101%) contrast(101%);
 }
 
@@ -1189,4 +1390,24 @@ img[src$='.svg'] {
 .animate-bounce-custom {
   animation: bounce-custom 2s infinite ease-in-out;
 }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a; /* slate-900 */
+}
+::-webkit-scrollbar-thumb {
+  background: #06b6d4; /* cyan-500 */
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d946ef; /* fuchsia-500 */
+}
+
+/* Custom Cursor */
+/* * {
+  cursor: url('/icons/ui/mouse/cursor-custom.svg'), auto !important;
+} */
 </style>
