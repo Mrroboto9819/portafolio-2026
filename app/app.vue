@@ -910,9 +910,9 @@ const projects = ref([
     completed: true,
     redirect: 'https://store.pablocabrera.dev/',
     platforms: [
-      { name: 'Windows', icon: '/icons/os/windows.svg', url: 'https://github.com/Mrroboto9819/task-manager-v1/releases/download/V1.0/x86_64-pc-windows-msvc.zip' },
-      { name: 'Linux', icon: '/icons/os/linux.svg', url: 'https://github.com/Mrroboto9819/task-manager-v1/releases/download/V1.0/task-manager-v1_0.1.0_amd64.deb' },
-      { name: 'macOS', icon: '/icons/os/apple.svg', url: 'https://github.com/Mrroboto9819/task-manager-v1/releases/download/V1.0/task-manager-v1_0.1.0_x64.dmg' }
+      { name: 'Windows', icon: '/icons/os/windows.svg', url: 'https://github.com/Mrroboto9819/FlowStack-desktop/releases/latest/download/FlowStack_4.0.1_x64_en-US.msi' },
+      { name: 'Linux', icon: '/icons/os/linux.svg', url: 'https://github.com/Mrroboto9819/FlowStack-desktop/releases/latest/download/FlowStack_4.0.1_amd64.deb' },
+      { name: 'macOS', icon: '/icons/os/apple.svg', url: 'https://github.com/Mrroboto9819/FlowStack-desktop/releases/latest/download/FlowStack_4.0.1_aarch64.dmg' }
     ],
     icon: null,
     iconStyle: {},
