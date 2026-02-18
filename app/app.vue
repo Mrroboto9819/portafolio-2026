@@ -890,10 +890,10 @@ const projects = ref([
     opacity: 1
   },
   {
-    name: 'ECOMMERCE_DEMO_FRONTEND',
+    name: 'ECOMMERCE_DEMO',
     type: 'SIDE_QUEST',
-    description: 'Ecommerce demo frontend',
-    tech: ['Nuxtjs', 'TailwindCSS'],
+    description: 'Ecommerce demo frontend and backend',
+    tech: ['Nuxtjs', 'TailwindCSS', 'Django', 'PostgreSQL'],
     xp: 1000,
     completed: true,
     redirect: 'https://store.pablocabrera.dev/',
