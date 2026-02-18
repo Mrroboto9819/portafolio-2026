@@ -832,18 +832,18 @@ const companies = [
 ]
 
 const skills = [
-  { name: 'JAVASCRIPT', icon: '/icons/javascript.svg', level: 95 },
-  { name: 'VUE.JS', icon: '/icons/vuedotjs.svg', level: 90 },
-  { name: 'REACT', icon: '/icons/react.svg', level: 85 },
-  { name: 'NODE.JS', icon: '/icons/nodedotjs.svg', level: 88 },
-  { name: 'PYTHON', icon: '/icons/python.svg', level: 80 },
-  { name: 'FLASK', icon: '/icons/flask.svg', level: 80 },
-  { name: 'DJANGO', icon: '/icons/django.svg', level: 85 },
-  { name: 'NEXT', icon: '/icons/nextdotjs.svg', level: 88 },
-  { name: 'NUXT', icon: '/icons/nuxt.svg', level: 88 },
-  { name: 'MYSQL', icon: '/icons/mysql.svg', level: 75 },
-  { name: 'MONGODB', icon: '/icons/mongodb.svg', level: 70 },
-  { name: 'DOCKER', icon: '/icons/docker.svg', level: 50 }
+  { name: 'JAVASCRIPT', icon: '/icons/javascript.svg', level: 100 },
+  { name: 'VUE.JS', icon: '/icons/vuedotjs.svg', level: 100 },
+  { name: 'REACT', icon: '/icons/react.svg', level: 100 },
+  { name: 'NODE.JS', icon: '/icons/nodedotjs.svg', level: 100 },
+  { name: 'PYTHON', icon: '/icons/python.svg', level: 100 },
+  { name: 'FLASK', icon: '/icons/flask.svg', level: 100 },
+  { name: 'DJANGO', icon: '/icons/django.svg', level: 100 },
+  { name: 'NEXT', icon: '/icons/nextdotjs.svg', level: 100 },
+  { name: 'NUXT', icon: '/icons/nuxt.svg', level: 100 },
+  { name: 'MYSQL', icon: '/icons/mysql.svg', level: 100 },
+  { name: 'MONGODB', icon: '/icons/mongodb.svg', level: 100 },
+  { name: 'DOCKER', icon: '/icons/docker.svg', level: 100 }
 ]
 
 const uiIcons = [
@@ -914,6 +914,23 @@ const projects = ref([
       { name: 'Linux', icon: '/icons/os/linux.svg', url: 'https://github.com/Mrroboto9819/FlowStack-desktop/releases/latest/download/FlowStack_4.0.1_amd64.deb' },
       { name: 'macOS', icon: '/icons/os/apple.svg', url: 'https://github.com/Mrroboto9819/FlowStack-desktop/releases/latest/download/FlowStack_4.0.1_aarch64.dmg' }
     ],
+    icon: null,
+    iconStyle: {},
+    opacity: 1
+  },
+  {
+    name: 'ADOPTME_WEBAPP',
+    type: 'SIDE_QUEST',
+    description: 'AdoptMe WebApp',
+    tech: ['SVELTEKIT', 'TAILWIND', 'TYPESCRIPT'],
+    xp: 3000,
+    completed: true,
+    redirect: 'https://adoptme.community/',
+    // platforms: [
+    //   { name: 'Windows', icon: '/icons/os/windows.svg', url: 'https://github.com/Mrroboto9819/FlowStack-desktop/releases/latest/download/FlowStack_4.0.1_x64_en-US.msi' },
+    //   { name: 'Linux', icon: '/icons/os/linux.svg', url: 'https://github.com/Mrroboto9819/FlowStack-desktop/releases/latest/download/FlowStack_4.0.1_amd64.deb' },
+    //   { name: 'macOS', icon: '/icons/os/apple.svg', url: 'https://github.com/Mrroboto9819/FlowStack-desktop/releases/latest/download/FlowStack_4.0.1_aarch64.dmg' }
+    // ],
     icon: null,
     iconStyle: {},
     opacity: 1
