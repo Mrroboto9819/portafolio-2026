@@ -919,6 +919,18 @@ const projects = ref([
     opacity: 1
   },
   {
+    name: 'OCHAT',
+    type: 'SIDE_QUEST',
+    description: 'Chat app',
+    tech: ['Nextjs', 'TailwindCSS', 'Typescript'],
+    xp: 1000,
+    completed: true,
+    redirect: 'https://ochat.pablocabrera.dev/',
+    icon: null,
+    iconStyle: {},
+    opacity: 1
+  },
+  {
     name: 'ADOPTME_WEBAPP',
     type: 'SIDE_QUEST',
     description: 'AdoptMe WebApp',
@@ -926,11 +938,6 @@ const projects = ref([
     xp: 3000,
     completed: true,
     redirect: 'https://adoptme.community/',
-    // platforms: [
-    //   { name: 'Windows', icon: '/icons/os/windows.svg', url: 'https://github.com/Mrroboto9819/FlowStack-desktop/releases/latest/download/FlowStack_4.0.1_x64_en-US.msi' },
-    //   { name: 'Linux', icon: '/icons/os/linux.svg', url: 'https://github.com/Mrroboto9819/FlowStack-desktop/releases/latest/download/FlowStack_4.0.1_amd64.deb' },
-    //   { name: 'macOS', icon: '/icons/os/apple.svg', url: 'https://github.com/Mrroboto9819/FlowStack-desktop/releases/latest/download/FlowStack_4.0.1_aarch64.dmg' }
-    // ],
     icon: null,
     iconStyle: {},
     opacity: 1
