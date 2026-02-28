@@ -5,10 +5,7 @@ on:
     branches: ["main", "develop"]
 
 jobs:
-  # ──────────────────────────────────────────────
-  # PRODUCTION — main → pablocabrera.dev
-  # Original server, original infrastructure
-  # ──────────────────────────────────────────────
+  # Production: main -> pablocabrera.dev
   deploy:
     name: Deploy Production (pablocabrera.dev)
     if: github.ref == 'refs/heads/main'
@@ -41,10 +38,7 @@ jobs:
             echo "Cleaning unused images..."
             docker image prune -f
 
-  # ──────────────────────────────────────────────
-  # BETA — develop → beta.pablocabrera.dev
-  # Docker Swarm infrastructure (new servers)
-  # ──────────────────────────────────────────────
+  # Beta: develop -> beta.pablocabrera.dev
   deploy-beta:
     name: Deploy Beta (beta.pablocabrera.dev)
     if: github.ref == 'refs/heads/develop'
@@ -73,9 +67,7 @@ jobs:
             set -e
             docker stack deploy -c /opt/docker-swarm/portafolio-stack.yml portafolio
 
-  # ──────────────────────────────────────────────
-  # NOTIFY — always runs after whichever job ran
-  # ──────────────────────────────────────────────
+  # Notify: always runs after whichever deploy job was eligible
   notify:
     name: Discord notification
     runs-on: ubuntu-latest
@@ -86,10 +78,18 @@ jobs:
       - name: Send Discord webhook
         env:
           WEBHOOK: ${{ secrets.DISCORD_DEPLOY_WEBHOOK }}
-          RESULT: ${{ needs.deploy.result == 'skipped' && needs['deploy-beta'].result || needs.deploy.result }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+          DEPLOY_BETA_RESULT: ${{ needs['deploy-beta'].result }}
           BRANCH: ${{ github.ref_name }}
           REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          SHA: ${{ github.sha }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+          RUN_NUMBER: ${{ github.run_number }}
           RUN_ID: ${{ github.run_id }}
+          EVENT_NAME: ${{ github.event_name }}
+          COMPARE_URL: ${{ github.event.compare }}
         run: |
           if [ -z "$WEBHOOK" ]; then
             echo "Discord webhook not configured, skipping"
@@ -97,22 +97,67 @@ jobs:
           fi
 
           RUN_URL="https://github.com/${REPO}/actions/runs/${RUN_ID}"
+          SHORT_SHA="$(echo "$SHA" | cut -c1-7)"
+          TIMESTAMP="$(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          SAFE_COMMIT_MESSAGE="${COMMIT_MESSAGE:-No commit message available}"
+          SAFE_COMPARE_URL="${COMPARE_URL:-N/A}"
+
+          if [ "$BRANCH" = "main" ]; then
+            TARGET_ENV="production"
+            TARGET_URL="https://pablocabrera.dev"
+          elif [ "$BRANCH" = "develop" ]; then
+            TARGET_ENV="beta"
+            TARGET_URL="https://beta.pablocabrera.dev"
+          else
+            TARGET_ENV="unknown"
+            TARGET_URL="N/A"
+          fi
+
+          if [ "$DEPLOY_RESULT" = "skipped" ]; then
+            RESULT="$DEPLOY_BETA_RESULT"
+            EXECUTED_JOB="deploy-beta"
+          else
+            RESULT="$DEPLOY_RESULT"
+            EXECUTED_JOB="deploy"
+          fi
 
           if [ "$RESULT" = "success" ]; then
             COLOR=3066993
-            STATUS="✅ Deploy successful"
-            DESC="Branch \`${BRANCH}\` deployed successfully"
+            STATUS="Deploy successful"
+            DESC="Branch \`${BRANCH}\` deployed to \`${TARGET_ENV}\`."
+          elif [ "$RESULT" = "cancelled" ]; then
+            COLOR=9807270
+            STATUS="Deploy cancelled"
+            DESC="Deployment was cancelled for branch \`${BRANCH}\`."
+          elif [ "$RESULT" = "skipped" ]; then
+            COLOR=10181046
+            STATUS="Deploy skipped"
+            DESC="No deploy job executed for branch \`${BRANCH}\`."
           else
             COLOR=15158332
-            STATUS="❌ Deploy failed"
-            DESC="Branch \`${BRANCH}\` deployment failed"
+            STATUS="Deploy failed"
+            DESC="Branch \`${BRANCH}\` failed to deploy to \`${TARGET_ENV}\`."
           fi
 
           jq -n \
             --arg title "$STATUS" \
             --arg desc "$DESC" \
             --arg branch "$BRANCH" \
+            --arg environment "$TARGET_ENV" \
+            --arg target "$TARGET_URL" \
+            --arg actor "$ACTOR" \
+            --arg sha "$SHORT_SHA" \
+            --arg commit_url "$COMMIT_URL" \
+            --arg commit_message "$SAFE_COMMIT_MESSAGE" \
+            --arg run_number "$RUN_NUMBER" \
             --arg run "$RUN_URL" \
+            --arg event "$EVENT_NAME" \
+            --arg compare "$SAFE_COMPARE_URL" \
+            --arg executed_job "$EXECUTED_JOB" \
+            --arg deploy_result "$DEPLOY_RESULT" \
+            --arg deploy_beta_result "$DEPLOY_BETA_RESULT" \
+            --arg timestamp "$TIMESTAMP" \
+            --arg repo "$REPO" \
             --argjson color $COLOR \
             '{
               embeds: [{
@@ -121,8 +166,22 @@ jobs:
                 color: $color,
                 fields: [
                   {name: "Branch", value: $branch, inline: true},
-                  {name: "CI Run", value: $run, inline: false}
-                ]
+                  {name: "Environment", value: $environment, inline: true},
+                  {name: "Actor", value: $actor, inline: true},
+                  {name: "Executed Job", value: $executed_job, inline: true},
+                  {name: "deploy result", value: $deploy_result, inline: true},
+                  {name: "deploy-beta result", value: $deploy_beta_result, inline: true},
+                  {name: "Commit", value: ("[`" + $sha + "`]" + "(" + $commit_url + ")"), inline: true},
+                  {name: "Commit Message", value: $commit_message, inline: false},
+                  {name: "Target URL", value: $target, inline: false},
+                  {name: "CI Run", value: ("[Run #" + $run_number + "](" + $run + ")"), inline: false},
+                  {name: "Event", value: $event, inline: true},
+                  {name: "Compare", value: $compare, inline: false},
+                  {name: "Timestamp", value: $timestamp, inline: false}
+                ],
+                footer: {
+                  text: $repo
+                }
               }]
             }' \
           | curl -H "Content-Type: application/json" -d @- "$WEBHOOK"
