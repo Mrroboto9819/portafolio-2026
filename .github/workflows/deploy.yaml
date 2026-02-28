@@ -60,8 +60,7 @@ jobs:
           port: ${{ secrets.SWARM_PORT }}
           script: |
             set -e
-            export SWARM_PATH=${{ secrets.SWARM_PATH }}
-            bash ${{ secrets.SWARM_PATH }}/scripts/deploy-beta.sh
+            bash /opt/scripts/deploy-beta.sh ${{ github.event.repository.name }} ${{ github.ref_name }}
 
       - name: Deploy stack on Master
         uses: appleboy/ssh-action@v1.2.0
