@@ -2,10 +2,16 @@ name: Front - Build & Deploy (Local Docker)
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "develop"]
 
 jobs:
+  # ──────────────────────────────────────────────
+  # PRODUCTION — main → pablocabrera.dev
+  # Original server, original infrastructure
+  # ──────────────────────────────────────────────
   deploy:
+    name: Deploy Production (pablocabrera.dev)
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -19,14 +25,12 @@ jobs:
           script: |
             set -e
 
-            cd /opt/webapps/apps/portafolio-2026
+            cd ${{ secrets.VPS_PATH }}
 
             echo "Pulling latest code..."
             git fetch origin main
             git reset --hard origin/main
             git clean -fd
-
-            git pull origin main
 
             echo "Building containers..."
             docker compose -f docker-compose.prod.yml build
@@ -37,45 +41,78 @@ jobs:
             echo "Cleaning unused images..."
             docker image prune -f
 
+  # ──────────────────────────────────────────────
+  # BETA — develop → beta.pablocabrera.dev
+  # Docker Swarm infrastructure (new servers)
+  # ──────────────────────────────────────────────
+  deploy-beta:
+    name: Deploy Beta (beta.pablocabrera.dev)
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Build image on Worker
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SWARM_WORKER_HOST }}
+          username: ${{ secrets.SWARM_USER }}
+          key: ${{ secrets.SWARM_SSH_KEY }}
+          port: ${{ secrets.SWARM_PORT }}
+          script: |
+            set -e
+            export SWARM_PATH=${{ secrets.SWARM_PATH }}
+            bash ${{ secrets.SWARM_PATH }}/scripts/deploy-beta.sh
+
+      - name: Deploy stack on Master
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SWARM_MASTER_HOST }}
+          username: ${{ secrets.SWARM_USER }}
+          key: ${{ secrets.SWARM_SSH_KEY }}
+          port: ${{ secrets.SWARM_PORT }}
+          script: |
+            set -e
+            docker stack deploy -c /opt/docker-swarm/portafolio-stack.yml portafolio
+
+  # ──────────────────────────────────────────────
+  # NOTIFY — always runs after whichever job ran
+  # ──────────────────────────────────────────────
   notify:
     name: Discord notification
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: [deploy, deploy-beta]
     if: always()
 
     steps:
       - name: Send Discord webhook
         env:
           WEBHOOK: ${{ secrets.DISCORD_DEPLOY_WEBHOOK }}
-          RESULT: ${{ needs.deploy.result }}
-          VERSION: ${{ github.ref_name }}
+          RESULT: ${{ needs.deploy.result == 'skipped' && needs['deploy-beta'].result || needs.deploy.result }}
+          BRANCH: ${{ github.ref_name }}
           REPO: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
         run: |
-          # Skip if no webhook configured
           if [ -z "$WEBHOOK" ]; then
-            echo "Discord webhook not configured, skipping notification"
+            echo "Discord webhook not configured, skipping"
             exit 0
           fi
 
-          RELEASE_URL="https://github.com/${REPO}/releases/tag/${VERSION}"
           RUN_URL="https://github.com/${REPO}/actions/runs/${RUN_ID}"
 
           if [ "$RESULT" = "success" ]; then
-            COLOR=3066993   # green
-            STATUS="✅ Release successful"
-            DESC="All platforms built and uploaded"
+            COLOR=3066993
+            STATUS="✅ Deploy successful"
+            DESC="Branch \`${BRANCH}\` deployed successfully"
           else
-            COLOR=15158332  # red
-            STATUS="❌ Release failed"
-            DESC="One or more builds failed"
+            COLOR=15158332
+            STATUS="❌ Deploy failed"
+            DESC="Branch \`${BRANCH}\` deployment failed"
           fi
 
           jq -n \
             --arg title "$STATUS" \
             --arg desc "$DESC" \
-            --arg version "$VERSION" \
-            --arg release "$RELEASE_URL" \
+            --arg branch "$BRANCH" \
             --arg run "$RUN_URL" \
             --argjson color $COLOR \
             '{
@@ -84,8 +121,7 @@ jobs:
                 description: $desc,
                 color: $color,
                 fields: [
-                  {name: "Version", value: $version, inline: true},
-                  {name: "Release", value: $release, inline: false},
+                  {name: "Branch", value: $branch, inline: true},
                   {name: "CI Run", value: $run, inline: false}
                 ]
               }]
