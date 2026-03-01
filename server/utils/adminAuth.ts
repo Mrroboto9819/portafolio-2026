@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 import type { H3Event } from 'h3'
+import { getAdminPasswordSecret } from './secrets'
 
 const ADMIN_COOKIE_NAME = 'admin_session'
 
@@ -12,8 +13,8 @@ function toPositiveNumber(value: unknown, fallback: number): number {
 }
 
 function getAdminPassword(event: H3Event): string {
-  const config = useRuntimeConfig(event)
-  return String(config.adminPassword || '')
+  void event
+  return getAdminPasswordSecret()
 }
 
 function signSession(expiresAt: number, secret: string): string {

@@ -93,9 +93,20 @@
           AUTO-REFRESH EVERY 3s - WATCH HOSTNAME ACROSS REPLICAS
         </p>
 
+        <p v-if="restartMessage" class="mt-4 text-xs text-cyan-300 tracking-wide">{{ restartMessage }}</p>
+
         <button
           type="button"
-          class="mt-5 w-full px-4 py-2 bg-slate-800 border border-slate-700 text-slate-300 text-xs tracking-widest uppercase hover:bg-slate-700 transition"
+          class="mt-5 w-full px-4 py-2 bg-fuchsia-500/20 border border-fuchsia-500 text-fuchsia-300 text-xs tracking-widest uppercase hover:bg-fuchsia-500/30 transition disabled:opacity-60"
+          :disabled="isRestarting"
+          @click="restartSwarm"
+        >
+          {{ isRestarting ? 'Restarting...' : 'Restart Swarm Service' }}
+        </button>
+
+        <button
+          type="button"
+          class="mt-3 w-full px-4 py-2 bg-slate-800 border border-slate-700 text-slate-300 text-xs tracking-widest uppercase hover:bg-slate-700 transition"
           @click="lock"
         >
           Lock Admin
@@ -121,6 +132,8 @@ const isAuthorized = ref(false)
 const passwordInput = ref('')
 const authError = ref('')
 const isRedirecting = ref(false)
+const isRestarting = ref(false)
+const restartMessage = ref('')
 
 const rows = computed(() => [
   { label: 'Hostname', value: info.value?.hostname ?? '-' },
@@ -169,8 +182,45 @@ async function fetchInfo() {
   }
 }
 
+async function restartSwarm() {
+  if (isRestarting.value) return
+
+  isRestarting.value = true
+  authError.value = ''
+  restartMessage.value = ''
+
+  try {
+    const response = await $fetch<{ executedAt: string; stdout?: string; stderr?: string }>('/api/admin/restart', {
+      method: 'POST',
+    })
+
+    const executedAt = new Date(response.executedAt).toLocaleTimeString()
+    restartMessage.value = `Restart triggered at ${executedAt}.`
+    if (response.stderr) {
+      restartMessage.value = `${restartMessage.value} Warning: ${response.stderr}`
+    }
+    await fetchInfo()
+  } catch (error) {
+    const status = getStatusCode(error)
+    if (status === 401 || status === 403) {
+      await redirectToMain()
+      return
+    }
+
+    if (status === 429) {
+      authError.value = 'Too many restart requests. Please wait.'
+      return
+    }
+
+    authError.value = 'Unable to restart swarm service.'
+  } finally {
+    isRestarting.value = false
+  }
+}
+
 async function unlock() {
   authError.value = ''
+  restartMessage.value = ''
 
   const password = passwordInput.value.trim()
   if (!password) {
@@ -214,6 +264,7 @@ async function lock() {
   isAuthorized.value = false
   info.value = null
   authError.value = ''
+  restartMessage.value = ''
   passwordInput.value = ''
 }
 

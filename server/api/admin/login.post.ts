@@ -1,5 +1,6 @@
 import { setAdminSessionCookie } from '../../utils/adminAuth'
 import { enforceRateLimit } from '../../utils/rateLimit'
+import { getAdminPasswordSecret } from '../../utils/secrets'
 
 type LoginBody = {
   password?: string
@@ -9,7 +10,7 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
   const windowSeconds = Number(config.adminRateLimitWindowSeconds || 900)
   const maxAttempts = Number(config.adminLoginMaxAttempts || 10)
-  const expectedPassword = String(config.adminPassword || '')
+  const expectedPassword = getAdminPasswordSecret()
 
   enforceRateLimit(event, {
     key: 'admin-login',

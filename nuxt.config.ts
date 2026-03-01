@@ -4,16 +4,18 @@ const adminSessionTtlSeconds = Number.parseInt(process.env.ADMIN_SESSION_TTL_SEC
 const adminLoginMaxAttempts = Number.parseInt(process.env.ADMIN_LOGIN_MAX_ATTEMPTS || '10', 10)
 const adminInfoMaxRequests = Number.parseInt(process.env.ADMIN_INFO_MAX_REQUESTS || '120', 10)
 const adminRateLimitWindowSeconds = Number.parseInt(process.env.ADMIN_RATE_LIMIT_WINDOW_SECONDS || '900', 10)
+const adminRestartMaxRequests = Number.parseInt(process.env.ADMIN_RESTART_MAX_REQUESTS || '5', 10)
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   runtimeConfig: {
-    adminPassword: process.env.ADMIN_PASSWORD || '',
     adminSessionTtlSeconds: Number.isFinite(adminSessionTtlSeconds) ? adminSessionTtlSeconds : 900,
     adminLoginMaxAttempts: Number.isFinite(adminLoginMaxAttempts) ? adminLoginMaxAttempts : 10,
     adminInfoMaxRequests: Number.isFinite(adminInfoMaxRequests) ? adminInfoMaxRequests : 120,
     adminRateLimitWindowSeconds: Number.isFinite(adminRateLimitWindowSeconds) ? adminRateLimitWindowSeconds : 900,
+    adminRestartMaxRequests: Number.isFinite(adminRestartMaxRequests) ? adminRestartMaxRequests : 5,
+    adminSwarmRestartCommand: process.env.ADMIN_SWARM_RESTART_COMMAND || 'docker stack deploy -c /opt/docker-swarm/portafolio-stack.yml portafolio',
   },
   modules: ['@nuxtjs/i18n'],
   css: ['./app/assets/css/main.css'],
