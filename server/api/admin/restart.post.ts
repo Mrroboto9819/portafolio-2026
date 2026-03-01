@@ -21,8 +21,8 @@ export default defineEventHandler(async (event) => {
 
   const restartedAt = new Date().toISOString()
 
-  // Exit the Node.js process after responding — Docker restart policy brings it back up.
-  setTimeout(() => process.exit(0), 500)
+  // Send SIGTERM after responding — exit code 143 triggers Docker restart policy.
+  setTimeout(() => process.kill(process.pid, 'SIGTERM'), 500)
 
   return {
     ok: true,
