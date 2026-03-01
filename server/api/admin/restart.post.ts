@@ -1,17 +1,5 @@
-import { promisify } from 'node:util'
-import { exec as execCallback } from 'node:child_process'
 import { isAdminAuthenticated } from '../../utils/adminAuth'
 import { enforceRateLimit } from '../../utils/rateLimit'
-import { getSwarmRestartCommandSecret } from '../../utils/secrets'
-
-const exec = promisify(execCallback)
-
-function trimOutput(output: string, max = 600): string {
-  const value = output.trim()
-  if (!value) return ''
-  if (value.length <= max) return value
-  return `${value.slice(0, max)}...`
-}
 
 export default defineEventHandler(async (event) => {
   if (!isAdminAuthenticated(event)) {
@@ -24,7 +12,6 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
   const windowSeconds = Number(config.adminRateLimitWindowSeconds || 900)
   const maxRequests = Number(config.adminRestartMaxRequests || 5)
-  const command = getSwarmRestartCommandSecret()
 
   enforceRateLimit(event, {
     key: 'admin-restart',
@@ -32,32 +19,13 @@ export default defineEventHandler(async (event) => {
     windowMs: windowSeconds * 1000,
   })
 
-  if (!command) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Restart command is not configured',
-    })
-  }
+  const restartedAt = new Date().toISOString()
 
-  try {
-    const { stdout, stderr } = await exec(command, {
-      timeout: 120000,
-      maxBuffer: 1024 * 1024,
-      env: { ...process.env },
-    })
+  // Exit the Node.js process after responding — Docker restart policy brings it back up.
+  setTimeout(() => process.exit(0), 500)
 
-    return {
-      ok: true,
-      command,
-      stdout: trimOutput(stdout),
-      stderr: trimOutput(stderr),
-      executedAt: new Date().toISOString(),
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Restart command failed'
-    throw createError({
-      statusCode: 500,
-      statusMessage: message,
-    })
+  return {
+    ok: true,
+    restartedAt,
   }
 })

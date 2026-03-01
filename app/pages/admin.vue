@@ -190,16 +190,12 @@ async function restartSwarm() {
   restartMessage.value = ''
 
   try {
-    const response = await $fetch<{ executedAt: string; stdout?: string; stderr?: string }>('/api/admin/restart', {
+    const response = await $fetch<{ restartedAt: string }>('/api/admin/restart', {
       method: 'POST',
     })
 
-    const executedAt = new Date(response.executedAt).toLocaleTimeString()
-    restartMessage.value = `Restart triggered at ${executedAt}.`
-    if (response.stderr) {
-      restartMessage.value = `${restartMessage.value} Warning: ${response.stderr}`
-    }
-    await fetchInfo()
+    const restartedAt = new Date(response.restartedAt).toLocaleTimeString()
+    restartMessage.value = `Process restarting at ${restartedAt}. Page will reconnect shortly.`
   } catch (error) {
     const status = getStatusCode(error)
     if (status === 401 || status === 403) {

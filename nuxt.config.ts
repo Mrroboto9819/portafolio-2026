@@ -15,7 +15,6 @@ export default defineNuxtConfig({
     adminInfoMaxRequests: Number.isFinite(adminInfoMaxRequests) ? adminInfoMaxRequests : 120,
     adminRateLimitWindowSeconds: Number.isFinite(adminRateLimitWindowSeconds) ? adminRateLimitWindowSeconds : 900,
     adminRestartMaxRequests: Number.isFinite(adminRestartMaxRequests) ? adminRestartMaxRequests : 5,
-    adminSwarmRestartCommand: process.env.ADMIN_SWARM_RESTART_COMMAND || 'docker stack deploy -c /opt/docker-swarm/portafolio-stack.yml portafolio',
   },
   modules: ['@nuxtjs/i18n'],
   css: ['./app/assets/css/main.css'],
