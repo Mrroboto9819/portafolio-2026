@@ -90,7 +90,7 @@
         </div>
 
         <p class="mt-4 text-center text-[10px] text-slate-700 tracking-widest">
-          AUTO-REFRESH EVERY 3s - WATCH HOSTNAME ACROSS REPLICAS
+          AUTO-REFRESH EVERY 30s - WATCH HOSTNAME ACROSS REPLICAS
         </p>
 
         <p v-if="restartMessage" class="mt-4 text-xs text-cyan-300 tracking-wide">{{ restartMessage }}</p>
@@ -286,7 +286,7 @@ onMounted(async () => {
     if (isAuthorized.value) {
       fetchInfo()
     }
-  }, 3000)
+  }, 30000)
 
   onUnmounted(() => clearInterval(interval))
 })

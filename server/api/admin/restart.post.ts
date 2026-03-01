@@ -2,6 +2,7 @@ import { promisify } from 'node:util'
 import { exec as execCallback } from 'node:child_process'
 import { isAdminAuthenticated } from '../../utils/adminAuth'
 import { enforceRateLimit } from '../../utils/rateLimit'
+import { getSwarmRestartCommandSecret } from '../../utils/secrets'
 
 const exec = promisify(execCallback)
 
@@ -23,7 +24,7 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
   const windowSeconds = Number(config.adminRateLimitWindowSeconds || 900)
   const maxRequests = Number(config.adminRestartMaxRequests || 5)
-  const command = String(config.adminSwarmRestartCommand || '').trim()
+  const command = getSwarmRestartCommandSecret()
 
   enforceRateLimit(event, {
     key: 'admin-restart',
@@ -42,6 +43,7 @@ export default defineEventHandler(async (event) => {
     const { stdout, stderr } = await exec(command, {
       timeout: 120000,
       maxBuffer: 1024 * 1024,
+      env: { ...process.env },
     })
 
     return {
