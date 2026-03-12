@@ -97,13 +97,13 @@ jobs:
 
       - name: Import image to worker node
         run: |
-          echo "=== Creating importer pod on dev worker ==="
+          echo "=== Creating importer pod on dev worker (default ns) ==="
           kubectl apply -f - <<'YAML'
           apiVersion: v1
           kind: Pod
           metadata:
-            name: image-importer
-            namespace: portafolio
+            name: portafolio-importer
+            namespace: default
           spec:
             nodeSelector:
               nodepool: dev
@@ -118,16 +118,16 @@ jobs:
           YAML
 
           echo "=== Waiting for importer pod ==="
-          kubectl wait --for=condition=Ready pod/image-importer -n $NAMESPACE --timeout=60s
+          kubectl wait --for=condition=Ready pod/portafolio-importer -n default --timeout=60s
 
           echo "=== Importing image via nsenter ==="
-          kubectl exec -i image-importer -n $NAMESPACE -- \
+          kubectl exec -i portafolio-importer -n default -- \
             nsenter -t 1 -m -u -i -n -- \
             ctr -a /run/k3s/containerd/containerd.sock -n k8s.io images import - \
             < /tmp/portafolio.tar
 
           echo "=== Cleanup ==="
-          kubectl delete pod image-importer -n $NAMESPACE --force --grace-period=0
+          kubectl delete pod portafolio-importer -n default --force --grace-period=0
           rm -f /tmp/portafolio.tar
 
           echo "Image imported to worker: ${{ steps.env.outputs.image }}"
