@@ -45,7 +45,7 @@
         }
     },
     "FOOTER": {
-        "SYSTEM": "SYSTEM v3.7",
+        "SYSTEM": "SYSTEM",
         "CREDITS": "CREDITS",
         "BUILT_WITH": "BUILT WITH",
         "ICONS_BY": "ICONS BY NUCLEO",

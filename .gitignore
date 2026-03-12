@@ -35,7 +35,6 @@ tmpclaude-*
 !.env.example
 
 # Production Docker files (keep dev versions only)
-Dockerfile
 docker-compose.yml
 docker-compose.prod.yml
 

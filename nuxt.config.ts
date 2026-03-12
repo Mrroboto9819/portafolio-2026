@@ -1,8 +1,25 @@
 import tailwindcss from "@tailwindcss/vite";
+import pkg from "./package.json";
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const adminSessionTtlSeconds = Number.parseInt(process.env.ADMIN_SESSION_TTL_SECONDS || '900', 10)
+const adminLoginMaxAttempts = Number.parseInt(process.env.ADMIN_LOGIN_MAX_ATTEMPTS || '10', 10)
+const adminInfoMaxRequests = Number.parseInt(process.env.ADMIN_INFO_MAX_REQUESTS || '120', 10)
+const adminRateLimitWindowSeconds = Number.parseInt(process.env.ADMIN_RATE_LIMIT_WINDOW_SECONDS || '900', 10)
+const adminRestartMaxRequests = Number.parseInt(process.env.ADMIN_RESTART_MAX_REQUESTS || '5', 10)
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      appVersion: pkg.version,
+    },
+    adminSessionTtlSeconds: Number.isFinite(adminSessionTtlSeconds) ? adminSessionTtlSeconds : 900,
+    adminLoginMaxAttempts: Number.isFinite(adminLoginMaxAttempts) ? adminLoginMaxAttempts : 10,
+    adminInfoMaxRequests: Number.isFinite(adminInfoMaxRequests) ? adminInfoMaxRequests : 120,
+    adminRateLimitWindowSeconds: Number.isFinite(adminRateLimitWindowSeconds) ? adminRateLimitWindowSeconds : 900,
+    adminRestartMaxRequests: Number.isFinite(adminRestartMaxRequests) ? adminRestartMaxRequests : 5,
+  },
   modules: ['@nuxtjs/i18n'],
   css: ['./app/assets/css/main.css'],
   vite: {
