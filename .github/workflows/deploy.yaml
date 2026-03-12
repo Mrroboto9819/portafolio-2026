@@ -1,188 +1,141 @@
-name: Front - Build & Deploy (Local Docker)
+name: Deploy Portafolio
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: [develop, main]
+  workflow_dispatch:
+
+env:
+  NAMESPACE: portafolio
+  CONTAINERD_SOCK: /run/k3s/containerd/containerd.sock
 
 jobs:
-  # Production: main -> pablocabrera.dev
   deploy:
-    name: Deploy Production (pablocabrera.dev)
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, portafolio]
+    timeout-minutes: 15
 
     steps:
-      - name: Deploy via SSH (local Docker build)
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT }}
-          script: |
-            set -e
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            cd ${{ secrets.VPS_PATH }}
-
-            echo "Pulling latest code..."
-            git fetch origin main
-            git reset --hard origin/main
-            git clean -fd
-
-            echo "Building containers..."
-            docker compose -f docker-compose.prod.yml build
-
-            echo "Restarting containers..."
-            docker compose -f docker-compose.prod.yml up -d
-
-            echo "Cleaning unused images..."
-            docker image prune -f
-
-  # Beta: develop -> beta.pablocabrera.dev
-  deploy-beta:
-    name: Deploy Beta (beta.pablocabrera.dev)
-    if: github.ref == 'refs/heads/develop'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Build image on Worker
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SWARM_WORKER_HOST }}
-          username: ${{ secrets.SWARM_USER }}
-          key: ${{ secrets.SWARM_SSH_KEY }}
-          port: ${{ secrets.SWARM_PORT }}
-          script: |
-            set -e
-            bash /opt/scripts/deploy-beta.sh ${{ github.event.repository.name }} ${{ github.ref_name }}
-
-      - name: Deploy stack on Master
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SWARM_MASTER_HOST }}
-          username: ${{ secrets.SWARM_USER }}
-          key: ${{ secrets.SWARM_SSH_KEY }}
-          port: ${{ secrets.SWARM_PORT }}
-          script: |
-            set -e
-            docker stack deploy -c /opt/docker-swarm/portafolio-stack.yml portafolio
-            docker service update --force portafolio_portafolio
-
-  # Notify: always runs after whichever deploy job was eligible
-  notify:
-    name: Discord notification
-    runs-on: ubuntu-latest
-    needs: [deploy, deploy-beta]
-    if: always()
-
-    steps:
-      - name: Send Discord webhook
-        env:
-          WEBHOOK: ${{ secrets.DISCORD_DEPLOY_WEBHOOK }}
-          DEPLOY_RESULT: ${{ needs.deploy.result }}
-          DEPLOY_BETA_RESULT: ${{ needs['deploy-beta'].result }}
-          BRANCH: ${{ github.ref_name }}
-          REPO: ${{ github.repository }}
-          ACTOR: ${{ github.actor }}
-          SHA: ${{ github.sha }}
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-          RUN_NUMBER: ${{ github.run_number }}
-          RUN_ID: ${{ github.run_id }}
-          EVENT_NAME: ${{ github.event_name }}
-          COMPARE_URL: ${{ github.event.compare }}
+      - name: Set environment variables
+        id: env
         run: |
-          if [ -z "$WEBHOOK" ]; then
-            echo "Discord webhook not configured, skipping"
-            exit 0
-          fi
-
-          RUN_URL="https://github.com/${REPO}/actions/runs/${RUN_ID}"
-          SHORT_SHA="$(echo "$SHA" | cut -c1-7)"
-          TIMESTAMP="$(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-          SAFE_COMMIT_MESSAGE="${COMMIT_MESSAGE:-No commit message available}"
-          SAFE_COMPARE_URL="${COMPARE_URL:-N/A}"
+          BRANCH="${GITHUB_REF##refs/heads/}"
+          SHA=$(git rev-parse --short HEAD)
 
           if [ "$BRANCH" = "main" ]; then
-            TARGET_ENV="production"
-            TARGET_URL="https://pablocabrera.dev"
-          elif [ "$BRANCH" = "develop" ]; then
-            TARGET_ENV="beta"
-            TARGET_URL="https://beta.pablocabrera.dev"
+            echo "deploy_name=portafolio-prod" >> "$GITHUB_OUTPUT"
+            echo "image_tag=latest" >> "$GITHUB_OUTPUT"
+            echo "node_env=production" >> "$GITHUB_OUTPUT"
           else
-            TARGET_ENV="unknown"
-            TARGET_URL="N/A"
+            echo "deploy_name=portafolio-dev" >> "$GITHUB_OUTPUT"
+            echo "image_tag=develop" >> "$GITHUB_OUTPUT"
+            echo "node_env=development" >> "$GITHUB_OUTPUT"
           fi
 
-          if [ "$DEPLOY_RESULT" = "skipped" ]; then
-            RESULT="$DEPLOY_BETA_RESULT"
-            EXECUTED_JOB="deploy-beta"
-          else
-            RESULT="$DEPLOY_RESULT"
-            EXECUTED_JOB="deploy"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "image=portafolio-2026:${SHA}" >> "$GITHUB_OUTPUT"
+          echo "Branch: $BRANCH | Deploy: portafolio-$([ '$BRANCH' = 'main' ] && echo prod || echo dev) | SHA: $SHA"
+
+      - name: Install tools
+        run: |
+          if ! command -v buildctl &>/dev/null; then
+            curl -sSL https://github.com/moby/buildkit/releases/download/v0.18.2/buildkit-v0.18.2.linux-amd64.tar.gz | \
+              tar xz -C /usr/local/
           fi
 
-          if [ "$RESULT" = "success" ]; then
-            COLOR=3066993
-            STATUS="Deploy successful"
-            DESC="Branch \`${BRANCH}\` deployed to \`${TARGET_ENV}\`."
-          elif [ "$RESULT" = "cancelled" ]; then
-            COLOR=9807270
-            STATUS="Deploy cancelled"
-            DESC="Deployment was cancelled for branch \`${BRANCH}\`."
-          elif [ "$RESULT" = "skipped" ]; then
-            COLOR=10181046
-            STATUS="Deploy skipped"
-            DESC="No deploy job executed for branch \`${BRANCH}\`."
-          else
-            COLOR=15158332
-            STATUS="Deploy failed"
-            DESC="Branch \`${BRANCH}\` failed to deploy to \`${TARGET_ENV}\`."
+          if ! command -v ctr &>/dev/null; then
+            curl -sSL https://github.com/containerd/containerd/releases/download/v1.7.24/containerd-1.7.24-linux-amd64.tar.gz | \
+              tar xz -C /usr/local/
           fi
 
-          jq -n \
-            --arg title "$STATUS" \
-            --arg desc "$DESC" \
-            --arg branch "$BRANCH" \
-            --arg environment "$TARGET_ENV" \
-            --arg target "$TARGET_URL" \
-            --arg actor "$ACTOR" \
-            --arg sha "$SHORT_SHA" \
-            --arg commit_url "$COMMIT_URL" \
-            --arg commit_message "$SAFE_COMMIT_MESSAGE" \
-            --arg run_number "$RUN_NUMBER" \
-            --arg run "$RUN_URL" \
-            --arg event "$EVENT_NAME" \
-            --arg compare "$SAFE_COMPARE_URL" \
-            --arg executed_job "$EXECUTED_JOB" \
-            --arg deploy_result "$DEPLOY_RESULT" \
-            --arg deploy_beta_result "$DEPLOY_BETA_RESULT" \
-            --arg timestamp "$TIMESTAMP" \
-            --arg repo "$REPO" \
-            --argjson color $COLOR \
-            '{
-              embeds: [{
-                title: $title,
-                description: $desc,
-                color: $color,
-                fields: [
-                  {name: "Branch", value: $branch, inline: true},
-                  {name: "Environment", value: $environment, inline: true},
-                  {name: "Actor", value: $actor, inline: true},
-                  {name: "Executed Job", value: $executed_job, inline: true},
-                  {name: "deploy result", value: $deploy_result, inline: true},
-                  {name: "deploy-beta result", value: $deploy_beta_result, inline: true},
-                  {name: "Commit", value: ("[`" + $sha + "`]" + "(" + $commit_url + ")"), inline: true},
-                  {name: "Commit Message", value: $commit_message, inline: false},
-                  {name: "Target URL", value: $target, inline: false},
-                  {name: "CI Run", value: ("[Run #" + $run_number + "](" + $run + ")"), inline: false},
-                  {name: "Event", value: $event, inline: true},
-                  {name: "Compare", value: $compare, inline: false},
-                  {name: "Timestamp", value: $timestamp, inline: false}
-                ],
-                footer: {
-                  text: $repo
-                }
-              }]
-            }' \
-          | curl -H "Content-Type: application/json" -d @- "$WEBHOOK"
+          if ! command -v kubectl &>/dev/null; then
+            curl -sSLo /usr/local/bin/kubectl "https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kubectl"
+            chmod +x /usr/local/bin/kubectl
+          fi
+
+      - name: Start buildkitd
+        run: |
+          pkill buildkitd || true
+          sleep 2
+          if pgrep buildkitd > /dev/null; then
+            kill -9 $(pgrep buildkitd) 2>/dev/null || true
+            sleep 1
+          fi
+
+          buildkitd --addr unix:///run/buildkit/buildkitd.sock \
+            --oci-worker-gc=true \
+            --oci-worker-gc-keepstorage=2147483648 &
+
+          for i in $(seq 1 30); do
+            if [ -S /run/buildkit/buildkitd.sock ]; then
+              echo "buildkitd ready"
+              break
+            fi
+            sleep 1
+          done
+
+          if [ ! -S /run/buildkit/buildkitd.sock ]; then
+            echo "buildkitd failed to start"
+            exit 1
+          fi
+
+      - name: Build and import image
+        run: |
+          sync && echo 3 > /proc/sys/vm/drop_caches 2>/dev/null || true
+
+          echo "=== Building ${{ steps.env.outputs.image }} ==="
+          buildctl --addr unix:///run/buildkit/buildkitd.sock build \
+            --frontend dockerfile.v0 \
+            --local context=. \
+            --local dockerfile=. \
+            --opt filename=Dockerfile \
+            --output type=docker,name=${{ steps.env.outputs.image }},dest=/tmp/portafolio.tar
+
+          echo "=== Importing image ==="
+          ctr -a $CONTAINERD_SOCK -n k8s.io images import /tmp/portafolio.tar 2>&1 || {
+            echo "Import failed, retrying..."
+            sleep 3
+            ctr -a $CONTAINERD_SOCK -n k8s.io images import /tmp/portafolio.tar 2>&1
+          }
+          rm -f /tmp/portafolio.tar
+
+          if ctr -a $CONTAINERD_SOCK -n k8s.io images ls | grep -q "${{ steps.env.outputs.image }}"; then
+            echo "Image verified: ${{ steps.env.outputs.image }}"
+          else
+            echo "ERROR: Image not found after import!"
+            exit 1
+          fi
+
+      - name: Update deployment image
+        run: |
+          kubectl -n $NAMESPACE patch deployment ${{ steps.env.outputs.deploy_name }} -p \
+            '{"spec":{"template":{"spec":{"containers":[{"name":"portafolio","image":"docker.io/library/${{ steps.env.outputs.image }}","imagePullPolicy":"Never"}]}}}}'
+
+      - name: Wait for rollout
+        run: |
+          DEPLOY="${{ steps.env.outputs.deploy_name }}"
+          if ! kubectl -n $NAMESPACE rollout status deployment/$DEPLOY --timeout=180s 2>/dev/null; then
+            echo "$DEPLOY rollout timed out"
+            kubectl -n $NAMESPACE get pods -l app=$DEPLOY -o wide
+
+            kubectl -n $NAMESPACE get pods -l app=$DEPLOY --field-selector=status.phase!=Running -o name \
+              | xargs -r kubectl -n $NAMESPACE delete --force --grace-period=0 2>/dev/null || true
+
+            echo "Rolling back..."
+            kubectl -n $NAMESPACE rollout undo deployment/$DEPLOY
+            kubectl -n $NAMESPACE rollout status deployment/$DEPLOY --timeout=60s || true
+            exit 1
+          fi
+
+          echo "Deploy successful: $DEPLOY"
+
+      - name: Cleanup buildkitd
+        if: always()
+        run: |
+          pkill buildkitd || true
+          sleep 2
+          if pgrep buildkitd > /dev/null; then
+            kill -9 $(pgrep buildkitd) 2>/dev/null || true
+          fi
