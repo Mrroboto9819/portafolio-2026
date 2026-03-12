@@ -655,7 +655,7 @@
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 text-[10px] sm:text-xs text-slate-500">
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="text-fuchsia-400">◆</span>
-          <span>{{ $t('FOOTER.SYSTEM') }}</span>
+          <span>{{ $t('FOOTER.SYSTEM') }} v{{ appVersion }}</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="hidden sm:inline">{{ $t('FOOTER.CREDITS') }}: ∞</span>
@@ -743,6 +743,8 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useI18n } from 'vue-i18n'
+
+const { appVersion } = useRuntimeConfig().public
 
 import { Howl, Howler } from 'howler'
 
