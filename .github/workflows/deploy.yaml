@@ -81,7 +81,7 @@ jobs:
             exit 1
           fi
 
-      - name: Build and import image
+      - name: Build image
         run: |
           sync && echo 3 > /proc/sys/vm/drop_caches 2>/dev/null || true
 
@@ -93,20 +93,44 @@ jobs:
             --opt filename=Dockerfile \
             --output type=docker,name=${{ steps.env.outputs.image }},dest=/tmp/portafolio.tar
 
-          echo "=== Importing image ==="
-          ctr -a $CONTAINERD_SOCK -n k8s.io images import /tmp/portafolio.tar 2>&1 || {
-            echo "Import failed, retrying..."
-            sleep 3
-            ctr -a $CONTAINERD_SOCK -n k8s.io images import /tmp/portafolio.tar 2>&1
-          }
+          ls -lh /tmp/portafolio.tar
+
+      - name: Import image to worker node
+        run: |
+          echo "=== Creating importer pod on dev worker ==="
+          kubectl apply -f - <<'YAML'
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: image-importer
+            namespace: portafolio
+          spec:
+            nodeSelector:
+              nodepool: dev
+            restartPolicy: Never
+            hostPID: true
+            containers:
+              - name: importer
+                image: alpine:3.20
+                securityContext:
+                  privileged: true
+                command: ["sleep", "300"]
+          YAML
+
+          echo "=== Waiting for importer pod ==="
+          kubectl wait --for=condition=Ready pod/image-importer -n $NAMESPACE --timeout=60s
+
+          echo "=== Importing image via nsenter ==="
+          kubectl exec -i image-importer -n $NAMESPACE -- \
+            nsenter -t 1 -m -u -i -n -- \
+            ctr -a /run/k3s/containerd/containerd.sock -n k8s.io images import - \
+            < /tmp/portafolio.tar
+
+          echo "=== Cleanup ==="
+          kubectl delete pod image-importer -n $NAMESPACE --force --grace-period=0
           rm -f /tmp/portafolio.tar
 
-          if ctr -a $CONTAINERD_SOCK -n k8s.io images ls | grep -q "${{ steps.env.outputs.image }}"; then
-            echo "Image verified: ${{ steps.env.outputs.image }}"
-          else
-            echo "ERROR: Image not found after import!"
-            exit 1
-          fi
+          echo "Image imported to worker: ${{ steps.env.outputs.image }}"
 
       - name: Update deployment image
         run: |
