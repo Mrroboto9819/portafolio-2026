@@ -1,165 +1,127 @@
-name: Deploy Portafolio
+name: Deploy to k3s
 
 on:
   push:
     branches: [develop, main]
   workflow_dispatch:
 
-env:
-  NAMESPACE: portafolio
-  CONTAINERD_SOCK: /run/k3s/containerd/containerd.sock
+concurrency:
+  group: deploy-portafolio
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    runs-on: [self-hosted, portafolio]
-    timeout-minutes: 15
+    # In-cluster self-hosted runner (see k8s/ci/runner-deployment.yaml).
+    # The runner pod has the k3s containerd socket mounted, so it can
+    # build the image and import it directly into the kubelet's image
+    # cache without needing a registry.
+    runs-on: [self-hosted, linux, portafolio]
+    timeout-minutes: 30
+    env:
+      IMAGE: portafolio-2026:latest
+      TAR: /tmp/portafolio-2026.tar
+      APP_NS: portafolio
+      APP: portafolio
+      CONTAINERD_SOCK: /run/k3s/containerd/containerd.sock
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set environment variables
-        id: env
+      - name: Install kubectl + ctr + buildah
         run: |
-          BRANCH="${GITHUB_REF##refs/heads/}"
-          SHA=$(git rev-parse --short HEAD)
+          set -e
+          if ! command -v kubectl >/dev/null; then
+            KUBE_VER=$(curl -sL https://dl.k8s.io/release/stable.txt)
+            curl -sLo /tmp/kubectl "https://dl.k8s.io/release/${KUBE_VER}/bin/linux/amd64/kubectl"
+            sudo install -m 0755 /tmp/kubectl /usr/local/bin/kubectl
+          fi
+          if ! command -v ctr >/dev/null; then
+            CONTAINERD_VER=1.7.22
+            curl -sL "https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VER}/containerd-${CONTAINERD_VER}-linux-amd64.tar.gz" -o /tmp/containerd.tgz
+            sudo tar -xzf /tmp/containerd.tgz -C /usr/local bin/ctr
+            rm -f /tmp/containerd.tgz
+          fi
+          if ! command -v buildah >/dev/null || ! command -v fuse-overlayfs >/dev/null; then
+            sudo apt-get update -qq
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq buildah fuse-overlayfs uidmap
+          fi
 
-          if [ "$BRANCH" = "main" ]; then
-            echo "deploy_name=portafolio-prod" >> "$GITHUB_OUTPUT"
-            echo "image_tag=latest" >> "$GITHUB_OUTPUT"
-            echo "node_env=production" >> "$GITHUB_OUTPUT"
+      - name: Compute version components
+        # nuxt.config.ts formats these into:
+        #   <env>-v<pkg.version>-<DD-MM-YYYY>-build:<sha>
+        # `main` / `master` map to "production"; everything else stays as the
+        # branch name (sanitised so feature/* slashes don't poison the string).
+        # The vN segment comes from package.json — bump it when you ship a
+        # release; the date and SHA refresh every build.
+        run: |
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+          BRANCH=$(printf '%s' "${GITHUB_REF_NAME}" | tr -c 'A-Za-z0-9._-' '-')
+          if [ "${GITHUB_REF_NAME}" = "main" ] || [ "${GITHUB_REF_NAME}" = "master" ]; then
+            APP_ENV="production"
           else
-            echo "deploy_name=portafolio-dev" >> "$GITHUB_OUTPUT"
-            echo "image_tag=develop" >> "$GITHUB_OUTPUT"
-            echo "node_env=development" >> "$GITHUB_OUTPUT"
+            APP_ENV="${BRANCH}"
           fi
+          PKG_VERSION=$(jq -r .version package.json)
+          {
+            echo "APP_ENV=${APP_ENV}"
+            echo "APP_COMMIT=${SHORT_SHA}"
+          } >> "$GITHUB_ENV"
+          echo "Build will report: ${APP_ENV}-v${PKG_VERSION}-<today>-build:${SHORT_SHA}"
 
-          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
-          echo "image=portafolio-2026:${SHA}" >> "$GITHUB_OUTPUT"
-          echo "Branch: $BRANCH | Deploy: portafolio-$([ '$BRANCH' = 'main' ] && echo prod || echo dev) | SHA: $SHA"
-
-      - name: Install tools
+      - name: Build image with buildah
+        # Runner runs on overlayfs; default overlay driver can't stack.
+        # Try fuse-overlayfs first; fall back to vfs (slower, universal).
         run: |
-          if ! command -v buildctl &>/dev/null; then
-            curl -sSL https://github.com/moby/buildkit/releases/download/v0.18.2/buildkit-v0.18.2.linux-amd64.tar.gz | \
-              tar xz -C /usr/local/
+          set -e
+          BUILD_ARGS=(
+            --build-arg "APP_ENV=${APP_ENV}"
+            --build-arg "APP_COMMIT=${APP_COMMIT}"
+          )
+          STORAGE_OPTS=(--storage-driver overlay --storage-opt overlay.mount_program=/usr/bin/fuse-overlayfs)
+          if ! sudo buildah "${STORAGE_OPTS[@]}" bud --isolation chroot "${BUILD_ARGS[@]}" -t "${IMAGE}" . ; then
+            echo "fuse-overlayfs build failed; retrying with vfs driver"
+            sudo rm -rf /var/lib/containers/storage /root/.local/share/containers || true
+            STORAGE_OPTS=(--storage-driver vfs)
+            sudo buildah "${STORAGE_OPTS[@]}" bud --isolation chroot "${BUILD_ARGS[@]}" -t "${IMAGE}" .
           fi
+          sudo buildah "${STORAGE_OPTS[@]}" push "${IMAGE}" "docker-archive:${TAR}:${IMAGE}"
+          sudo chmod a+r "${TAR}"
 
-          if ! command -v ctr &>/dev/null; then
-            curl -sSL https://github.com/containerd/containerd/releases/download/v1.7.24/containerd-1.7.24-linux-amd64.tar.gz | \
-              tar xz -C /usr/local/
-          fi
-
-          if ! command -v kubectl &>/dev/null; then
-            curl -sSLo /usr/local/bin/kubectl "https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kubectl"
-            chmod +x /usr/local/bin/kubectl
-          fi
-
-      - name: Start buildkitd
+      - name: Import image into k3s containerd (k8s.io namespace)
         run: |
-          pkill buildkitd || true
-          sleep 2
-          if pgrep buildkitd > /dev/null; then
-            kill -9 $(pgrep buildkitd) 2>/dev/null || true
-            sleep 1
-          fi
+          sudo ctr --address "${CONTAINERD_SOCK}" -n k8s.io images import "${TAR}"
+          rm -f "${TAR}"
 
-          buildkitd --addr unix:///run/buildkit/buildkitd.sock \
-            --oci-worker-gc=true \
-            --oci-worker-gc-keepstorage=2147483648 &
-
-          for i in $(seq 1 30); do
-            if [ -S /run/buildkit/buildkitd.sock ]; then
-              echo "buildkitd ready"
-              break
-            fi
-            sleep 1
-          done
-
-          if [ ! -S /run/buildkit/buildkitd.sock ]; then
-            echo "buildkitd failed to start"
-            exit 1
-          fi
-
-      - name: Build image
+      - name: Configure in-cluster kubectl
         run: |
-          sync && echo 3 > /proc/sys/vm/drop_caches 2>/dev/null || true
+          SA_DIR=/var/run/secrets/kubernetes.io/serviceaccount
+          TOKEN=$(cat "$SA_DIR/token")
+          kubectl config set-cluster in-cluster \
+            --server=https://kubernetes.default.svc \
+            --certificate-authority="$SA_DIR/ca.crt" \
+            --embed-certs=true
+          kubectl config set-credentials sa --token="$TOKEN"
+          kubectl config set-context in-cluster \
+            --cluster=in-cluster --user=sa --namespace="${APP_NS}"
+          kubectl config use-context in-cluster
 
-          echo "=== Building ${{ steps.env.outputs.image }} ==="
-          buildctl --addr unix:///run/buildkit/buildkitd.sock build \
-            --frontend dockerfile.v0 \
-            --local context=. \
-            --local dockerfile=. \
-            --opt filename=Dockerfile \
-            --output type=docker,name=${{ steps.env.outputs.image }},dest=/tmp/portafolio.tar
-
-          ls -lh /tmp/portafolio.tar
-
-      - name: Import image to worker node
+      - name: Apply manifests
+        # namespace.yaml + secret.yaml + k8s/ci/* are bootstrapped out-of-band
+        # (cluster-scoped or carry secrets that don't belong in git).
         run: |
-          echo "=== Creating importer pod on dev worker (default ns) ==="
-          kubectl apply -f - <<'YAML'
-          apiVersion: v1
-          kind: Pod
-          metadata:
-            name: portafolio-importer
-            namespace: default
-          spec:
-            nodeSelector:
-              nodepool: dev
-            restartPolicy: Never
-            hostPID: true
-            containers:
-              - name: importer
-                image: alpine:3.20
-                securityContext:
-                  privileged: true
-                command: ["sleep", "300"]
-          YAML
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/ingress.yaml
 
-          echo "=== Waiting for importer pod ==="
-          kubectl wait --for=condition=Ready pod/portafolio-importer -n default --timeout=60s
-
-          echo "=== Importing image via nsenter ==="
-          kubectl exec -i portafolio-importer -n default -- \
-            nsenter -t 1 -m -u -i -n -- \
-            ctr -a /run/k3s/containerd/containerd.sock -n k8s.io images import - \
-            < /tmp/portafolio.tar
-
-          echo "=== Cleanup ==="
-          kubectl delete pod portafolio-importer -n default --force --grace-period=0
-          rm -f /tmp/portafolio.tar
-
-          echo "Image imported to worker: ${{ steps.env.outputs.image }}"
-
-      - name: Update deployment image
+      - name: Force pod restart to pick up new image
         run: |
-          kubectl -n $NAMESPACE patch deployment ${{ steps.env.outputs.deploy_name }} -p \
-            '{"spec":{"template":{"spec":{"containers":[{"name":"portafolio","image":"docker.io/library/${{ steps.env.outputs.image }}","imagePullPolicy":"Never"}]}}}}'
+          kubectl delete pod -n "${APP_NS}" -l "app=${APP}" --ignore-not-found
+          kubectl rollout status deployment/"${APP}" -n "${APP_NS}" --timeout=180s
 
-      - name: Wait for rollout
+      - name: Smoke-test /api/v1/health
         run: |
-          DEPLOY="${{ steps.env.outputs.deploy_name }}"
-          if ! kubectl -n $NAMESPACE rollout status deployment/$DEPLOY --timeout=180s 2>/dev/null; then
-            echo "$DEPLOY rollout timed out"
-            kubectl -n $NAMESPACE get pods -l app=$DEPLOY -o wide
-
-            kubectl -n $NAMESPACE get pods -l app=$DEPLOY --field-selector=status.phase!=Running -o name \
-              | xargs -r kubectl -n $NAMESPACE delete --force --grace-period=0 2>/dev/null || true
-
-            echo "Rolling back..."
-            kubectl -n $NAMESPACE rollout undo deployment/$DEPLOY
-            kubectl -n $NAMESPACE rollout status deployment/$DEPLOY --timeout=60s || true
-            exit 1
-          fi
-
-          echo "Deploy successful: $DEPLOY"
-
-      - name: Cleanup buildkitd
-        if: always()
-        run: |
-          pkill buildkitd || true
-          sleep 2
-          if pgrep buildkitd > /dev/null; then
-            kill -9 $(pgrep buildkitd) 2>/dev/null || true
-          fi
+          POD=$(kubectl get pod -n "${APP_NS}" -l "app=${APP}" -o jsonpath='{.items[0].metadata.name}')
+          # Image is oven/bun (no curl/wget) - use bun's built-in fetch.
+          kubectl exec -n "${APP_NS}" "$POD" -- bun -e \
+            'fetch("http://127.0.0.1:3000/api/v1/health").then(r=>r.text()).then(t=>{console.log(t); if(!t.includes("healthy")) process.exit(1);})'

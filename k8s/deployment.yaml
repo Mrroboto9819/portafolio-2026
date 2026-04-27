@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portafolio
+  namespace: portafolio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: portafolio
+  template:
+    metadata:
+      labels:
+        app: portafolio
+    spec:
+      nodeSelector:
+        nodepool: dev
+      containers:
+        - name: web
+          image: portafolio-2026:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+              name: http
+          envFrom:
+            - secretRef:
+                name: portafolio-env
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10

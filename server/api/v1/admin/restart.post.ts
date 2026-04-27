@@ -1,13 +1,8 @@
-import { isAdminAuthenticated } from '../../utils/adminAuth'
-import { enforceRateLimit } from '../../utils/rateLimit'
+import { requireAdmin } from '../../../utils/auth'
+import { enforceRateLimit } from '../../../utils/rateLimit'
 
 export default defineEventHandler(async (event) => {
-  if (!isAdminAuthenticated(event)) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized',
-    })
-  }
+  requireAdmin(event)
 
   const config = useRuntimeConfig(event)
   const windowSeconds = Number(config.adminRateLimitWindowSeconds || 900)
@@ -21,11 +16,8 @@ export default defineEventHandler(async (event) => {
 
   const restartedAt = new Date().toISOString()
 
-  // Send SIGTERM after responding — exit code 143 triggers Docker restart policy.
+  // Send SIGTERM after responding — kubelet restarts the container.
   setTimeout(() => process.kill(process.pid, 'SIGTERM'), 500)
 
-  return {
-    ok: true,
-    restartedAt,
-  }
+  return { ok: true, restartedAt }
 })

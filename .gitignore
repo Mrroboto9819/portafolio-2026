@@ -34,6 +34,11 @@ tmpclaude-*
 .env.*
 !.env.example
 
+# k8s manifests with real secrets. The .example template stays in git;
+# the populated copies (Mongo URI, JWT secrets, GitHub PAT) do not.
+k8s/secret.yaml
+k8s/ci/runner-token-secret.yaml
+
 # Production Docker files (keep dev versions only)
 docker-compose.yml
 docker-compose.prod.yml

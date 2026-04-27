@@ -1,6 +1,6 @@
 import os from 'os'
-import { isAdminAuthenticated } from '../utils/adminAuth'
-import { enforceRateLimit } from '../utils/rateLimit'
+import { requireAdmin } from '../../../utils/auth'
+import { enforceRateLimit } from '../../../utils/rateLimit'
 
 export default defineEventHandler((event) => {
   const config = useRuntimeConfig(event)
@@ -13,15 +13,9 @@ export default defineEventHandler((event) => {
     windowMs: windowSeconds * 1000,
   })
 
-  if (!isAdminAuthenticated(event)) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized',
-    })
-  }
+  requireAdmin(event)
 
   const hostname = os.hostname()
-
   const interfaces = os.networkInterfaces()
   let nodeIp = '-'
   for (const [name, addrs] of Object.entries(interfaces)) {

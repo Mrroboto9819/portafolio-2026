@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: portafolio
+  namespace: portafolio
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: pablocabrera.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portafolio
+                port:
+                  number: 3000
+    - host: www.pablocabrera.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portafolio
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - pablocabrera.dev
+        - www.pablocabrera.dev
