@@ -39,6 +39,11 @@ tmpclaude-*
 k8s/secret.yaml
 k8s/ci/runner-token-secret.yaml
 
+# Local deploy scripts — CI is the source of truth for deploys. Anything
+# matching deploy-*.sh / deploy-*.local.sh stays out of git so personal
+# tweaks (different envs, manual SHA overrides) don't leak.
+deploy-*.sh
+
 # Production Docker files (keep dev versions only)
 docker-compose.yml
 docker-compose.prod.yml
