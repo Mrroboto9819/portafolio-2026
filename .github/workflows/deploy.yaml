@@ -105,18 +105,41 @@ jobs:
           sudo ctr --address "${CONTAINERD_SOCK}" -n k8s.io images import "${TAR}"
           rm -f "${TAR}"
 
-      - name: Configure in-cluster kubectl
+      - name: Configure kubectl
+        # The runner can be either:
+        #   (a) an in-cluster pod with a mounted ServiceAccount token at
+        #       /var/run/secrets/kubernetes.io/serviceaccount/, or
+        #   (b) a host-installed runner whose user already has a kubeconfig
+        #       (~/.kube/config, KUBECONFIG, or /etc/rancher/k3s/k3s.yaml).
+        # We only synthesise an in-cluster kubeconfig when (a) is true AND
+        # there is no existing kubeconfig — otherwise we'd clobber a working
+        # one. Either way, we end with a verified `kubectl get ns` call so
+        # later steps fail fast with a clear error if creds are missing.
         run: |
-          SA_DIR=/var/run/secrets/kubernetes.io/serviceaccount
-          TOKEN=$(cat "$SA_DIR/token")
-          kubectl config set-cluster in-cluster \
-            --server=https://kubernetes.default.svc \
-            --certificate-authority="$SA_DIR/ca.crt" \
-            --embed-certs=true
-          kubectl config set-credentials sa --token="$TOKEN"
-          kubectl config set-context in-cluster \
-            --cluster=in-cluster --user=sa --namespace="${APP_NS}"
-          kubectl config use-context in-cluster
+          set -e
+          SA_TOKEN=/var/run/secrets/kubernetes.io/serviceaccount/token
+          if [ -f "$SA_TOKEN" ] && [ -z "${KUBECONFIG:-}" ] && [ ! -f "$HOME/.kube/config" ]; then
+            echo "In-cluster runner — configuring kubectl from ServiceAccount"
+            SA_DIR=/var/run/secrets/kubernetes.io/serviceaccount
+            kubectl config set-cluster in-cluster \
+              --server=https://kubernetes.default.svc \
+              --certificate-authority="$SA_DIR/ca.crt" \
+              --embed-certs=true
+            kubectl config set-credentials sa --token="$(cat "$SA_TOKEN")"
+            kubectl config set-context in-cluster \
+              --cluster=in-cluster --user=sa --namespace="${APP_NS}"
+            kubectl config use-context in-cluster
+          else
+            echo "Host runner — using existing kubeconfig"
+            # Fall back to the k3s default if nothing else is set. Readable
+            # only if the runner user is in the right group / chmod'd it.
+            if [ -z "${KUBECONFIG:-}" ] && [ ! -f "$HOME/.kube/config" ] && [ -r /etc/rancher/k3s/k3s.yaml ]; then
+              echo "KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> "$GITHUB_ENV"
+              export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+            fi
+          fi
+          kubectl get ns "${APP_NS}" >/dev/null
+          echo "kubectl OK — context: $(kubectl config current-context 2>/dev/null || echo n/a)"
 
       - name: Apply manifests
         # namespace.yaml + secret.yaml + k8s/ci/* are bootstrapped out-of-band
