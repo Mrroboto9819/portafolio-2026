@@ -1,4 +1,4 @@
-FROM oven/bun:1-alpine AS build
+FROM docker.io/oven/bun:1-alpine AS build
 
 # Version components — formatted by nuxt.config.ts as
 #   <env>-v<pkg.version>-<DD-MM-YYYY>-build:<sha>
@@ -21,7 +21,7 @@ COPY . .
 RUN bun run build
 
 # --- Production stage ---
-FROM oven/bun:1-alpine
+FROM docker.io/oven/bun:1-alpine
 
 WORKDIR /app
 

@@ -47,6 +47,18 @@ jobs:
             sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq buildah fuse-overlayfs uidmap
           fi
 
+      - name: Configure buildah unqualified-search registries
+        # Buildah doesn't ship with docker.io as a default unqualified search
+        # registry — short-names like `oven/bun:1-alpine` fail with "did not
+        # resolve to an alias". Drop a minimal registries.conf if missing so
+        # short-names from any Dockerfile resolve to docker.io.
+        run: |
+          set -e
+          sudo mkdir -p /etc/containers
+          if ! grep -q '^unqualified-search-registries' /etc/containers/registries.conf 2>/dev/null; then
+            echo 'unqualified-search-registries = ["docker.io"]' | sudo tee -a /etc/containers/registries.conf > /dev/null
+          fi
+
       - name: Compute version components
         # nuxt.config.ts formats these into:
         #   <env>-v<pkg.version>-<DD-MM-YYYY>-build:<sha>
