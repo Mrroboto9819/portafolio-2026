@@ -18,7 +18,11 @@ jobs:
     runs-on: [self-hosted, linux, portafolio]
     timeout-minutes: 30
     env:
-      IMAGE: portafolio-2026:latest
+      # Each build is tagged with the commit SHA so kubelet never has to
+      # guess which copy of `:latest` to use. The deployment manifest is
+      # patched per-deploy to reference this exact tag, eliminating the
+      # whole class of "kubelet picks up a stale phantom image" bugs.
+      IMAGE_REPO: portafolio-2026
       TAR: /tmp/portafolio-2026.tar
       APP_NS: portafolio
       APP: portafolio
@@ -75,11 +79,16 @@ jobs:
             APP_ENV="${BRANCH}"
           fi
           PKG_VERSION=$(jq -r .version package.json)
+          # Image is tagged with the commit SHA so kubelet always pulls a
+          # specific bundle on each deploy. No more :latest ambiguity.
+          IMAGE="${IMAGE_REPO}:${SHORT_SHA}"
           {
             echo "APP_ENV=${APP_ENV}"
             echo "APP_COMMIT=${SHORT_SHA}"
+            echo "IMAGE=${IMAGE}"
           } >> "$GITHUB_ENV"
           echo "Build will report: ${APP_ENV}-v${PKG_VERSION}-<today>-build:${SHORT_SHA}"
+          echo "Image tag: ${IMAGE}"
 
       - name: Build image with buildah
         # Runner runs on overlayfs; default overlay driver can't stack.
@@ -153,14 +162,20 @@ jobs:
       - name: Apply manifests
         # namespace.yaml + secret.yaml + k8s/ci/* are bootstrapped out-of-band
         # (cluster-scoped or carry secrets that don't belong in git).
+        # Service/ingress only reference label selectors, so they're stable.
         run: |
-          kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
           kubectl apply -f k8s/ingress.yaml
 
-      - name: Force pod restart to pick up new image
+      - name: Apply deployment with build-specific image tag
+        # The committed deployment.yaml ships with `image: portafolio-2026:latest`
+        # so manual deploys still work. CI substitutes the latest tag with the
+        # commit-SHA tag before applying, so kubelet never resolves `:latest`
+        # against a stale phantom in containerd. Single-shot apply — no race
+        # window where the old tag could briefly be in spec.
         run: |
-          kubectl delete pod -n "${APP_NS}" -l "app=${APP}" --ignore-not-found
+          sed "s|portafolio-2026:latest|${IMAGE}|g" k8s/deployment.yaml \
+            | kubectl apply -f -
           kubectl rollout status deployment/"${APP}" -n "${APP_NS}" --timeout=180s
 
       - name: Smoke-test /api/v1/health
