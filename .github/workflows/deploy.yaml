@@ -141,6 +141,15 @@ jobs:
           kubectl get ns "${APP_NS}" >/dev/null
           echo "kubectl OK — context: $(kubectl config current-context 2>/dev/null || echo n/a)"
 
+      - name: Remove legacy svc/ingress (one-time cleanup, idempotent)
+        # The pre-existing port-3001 deployment shipped a `portafolio-svc`
+        # service and `portafolio-ing` ingress. Both names differ from the new
+        # manifests (`portafolio` for both), so apply alone won't replace
+        # them. Delete-if-present keeps the namespace clean.
+        run: |
+          kubectl delete service portafolio-svc -n "${APP_NS}" --ignore-not-found
+          kubectl delete ingress portafolio-ing -n "${APP_NS}" --ignore-not-found
+
       - name: Apply manifests
         # namespace.yaml + secret.yaml + k8s/ci/* are bootstrapped out-of-band
         # (cluster-scoped or carry secrets that don't belong in git).

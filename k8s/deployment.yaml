@@ -5,6 +5,13 @@ metadata:
   namespace: portafolio
 spec:
   replicas: 1
+  # Recreate (vs. RollingUpdate) avoids the failure mode where a broken old
+  # ReplicaSet keeps a pod alive in ErrImageNeverPull while the new RS waits
+  # for it to terminate — the deploy deadlocks for 3 minutes and times out.
+  # We don't need rolling for a single-replica personal site; a few seconds
+  # of downtime per deploy is fine.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: portafolio
